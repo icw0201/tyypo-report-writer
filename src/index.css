@@ -416,6 +416,34 @@ h2 {
   flex: 1;
 }
 
+.slash-date-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.slash-date-input > svg {
+  position: absolute;
+  right: 10px;
+  color: #718096;
+  pointer-events: none;
+}
+
+.report-info-row .slash-date-input > input:first-child {
+  padding-right: 34px;
+}
+
+.report-info-row .native-date-picker {
+  position: absolute;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
 .report-row {
   display: grid;
   grid-template-columns: 56px 144px minmax(260px, 1fr) minmax(260px, 1fr) 42px;
@@ -448,6 +476,38 @@ h2 {
   border-color: rgba(255, 255, 255, 0.35);
 }
 
+.location-header {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-unit-toggle {
+  display: flex;
+  gap: 7px;
+  margin-left: auto;
+  color: #e2e8f0;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.header-unit-toggle label,
+.correction-types label {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.header-unit-toggle input,
+.correction-types input {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  accent-color: #315d9f;
+}
+
 .report-row .rich-editor-wrap {
   height: 100%;
   border: 0;
@@ -476,28 +536,34 @@ h2 {
 
 .location-cell {
   display: flex;
-  flex-direction: column;
-  gap: 7px;
   justify-content: center;
+  align-items: center;
   padding: 8px;
 }
 
-.unit-toggle {
+.correction-cell {
   display: flex;
-  gap: 10px;
-  color: #5d6b80;
-  font-size: 0.76rem;
+  flex-direction: column;
+}
+
+.correction-cell .rich-editor-wrap {
+  flex: 1;
+  height: auto;
+}
+
+.correction-types {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 9px;
+  color: #7a8596;
+  background: #f7f9fc;
+  border-bottom: 1px solid #e1e6ee;
+  font-size: 0.68rem;
   font-weight: 700;
 }
 
-.unit-toggle label {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.unit-toggle input {
-  margin: 0;
+.correction-types input {
   accent-color: var(--primary);
 }
 

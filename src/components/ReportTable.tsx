@@ -31,9 +31,9 @@ export function ReportTable({
     onRowsChange(rows.map((row) => (row.id === id ? { ...row, [column]: value } : row)))
   }
 
-  const updateLocation = (
+  const updateRow = (
     id: string,
-    update: Pick<ReportRow, 'unit'> | Pick<ReportRow, 'location'>,
+    update: Pick<ReportRow, 'location'> | Pick<ReportRow, 'correctionType'>,
   ) => {
     onRowsChange(rows.map((row) => (row.id === id ? { ...row, ...update } : row)))
   }
@@ -42,7 +42,10 @@ export function ReportTable({
     if (activatingGhost.current) return
     activatingGhost.current = true
     const id = createRowId()
-    onRowsChange([...rows, { id, unit: '', location: '', original: '', correction: '' }])
+    onRowsChange([
+      ...rows,
+      { id, location: '', original: '', correction: '', correctionType: 'none' },
+    ])
     requestAnimationFrame(() => {
       const editor = document.querySelector<HTMLInputElement>(
         `[data-cell="${id}-location"] .location-input`,
@@ -54,7 +57,9 @@ export function ReportTable({
 
   const removeRow = (id: string) => {
     if (rows.length === 1) {
-      onRowsChange([{ id, unit: '', location: '', original: '', correction: '' }])
+      onRowsChange([
+        { id, location: '', original: '', correction: '', correctionType: 'none' },
+      ])
       return
     }
     onRowsChange(rows.filter((row) => row.id !== id))
@@ -121,19 +126,17 @@ export function ReportTable({
               </div>
               {reportMeta.dateMode === 'calendar' ? (
                 <div className="date-range">
-                  <input
-                    type="date"
-                    aria-label="열람 시작일"
+                  <DateInput
+                    label="열람 시작일"
                     value={reportMeta.startDate}
-                    onChange={(event) => updateMeta('startDate', event.target.value)}
+                    onChange={(value) => updateMeta('startDate', value)}
                   />
                   <span>~</span>
-                  <input
-                    type="date"
-                    aria-label="열람 종료일"
-                    min={reportMeta.startDate || undefined}
+                  <DateInput
+                    label="열람 종료일"
                     value={reportMeta.endDate}
-                    onChange={(event) => updateMeta('endDate', event.target.value)}
+                    min={reportMeta.startDate}
+                    onChange={(value) => updateMeta('endDate', value)}
                   />
                 </div>
               ) : (
@@ -147,7 +150,29 @@ export function ReportTable({
           </div>
           <div className="report-row report-row--header" role="row">
             <div role="columnheader">num</div>
-            <div role="columnheader">화/권(선택)</div>
+            <div className="location-header" role="columnheader">
+              <span>화/권(선택)</span>
+              <div className="header-unit-toggle" aria-label="화 또는 권 단위">
+                <label>
+                  <input
+                    type="radio"
+                    name="location-unit"
+                    checked={reportMeta.locationUnit === 'episode'}
+                    onChange={() => updateMeta('locationUnit', 'episode')}
+                  />
+                  화
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="location-unit"
+                    checked={reportMeta.locationUnit === 'volume'}
+                    onChange={() => updateMeta('locationUnit', 'volume')}
+                  />
+                  권
+                </label>
+              </div>
+            </div>
             <div role="columnheader">본문</div>
             <div role="columnheader">수정</div>
             <div aria-hidden="true" />
@@ -159,26 +184,6 @@ export function ReportTable({
                 {index + 1}
               </div>
               <div className="location-cell" role="cell" data-cell={`${row.id}-location`}>
-                <div className="unit-toggle" aria-label={`${index + 1}행 단위`}>
-                  <label>
-                    <input
-                      type="radio"
-                      name={`unit-${row.id}`}
-                      checked={row.unit === 'episode'}
-                      onChange={() => updateLocation(row.id, { unit: 'episode' })}
-                    />
-                    화
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name={`unit-${row.id}`}
-                      checked={row.unit === 'volume'}
-                      onChange={() => updateLocation(row.id, { unit: 'volume' })}
-                    />
-                    권
-                  </label>
-                </div>
                 <div className="location-number">
                   <input
                     className="location-input"
@@ -186,12 +191,14 @@ export function ReportTable({
                     aria-label={`${index + 1}행 화 또는 권 숫자`}
                     value={row.location}
                     onChange={(event) =>
-                      updateLocation(row.id, {
+                      updateRow(row.id, {
                         location: event.target.value.replace(/\D/g, ''),
                       })
                     }
                   />
-                  {row.unit && <span>{row.unit === 'episode' ? '화' : '권'}</span>}
+                  {reportMeta.locationUnit && (
+                    <span>{reportMeta.locationUnit === 'episode' ? '화' : '권'}</span>
+                  )}
                 </div>
               </div>
               <TableCell
@@ -203,15 +210,21 @@ export function ReportTable({
                   activeEditor.current = editor
                 }}
               />
-              <TableCell
-                row={row}
-                column="correction"
-                label={`${index + 1}행 수정`}
-                onChange={updateCell}
-                onFocus={(editor) => {
-                  activeEditor.current = editor
-                }}
-              />
+              <div className="correction-cell" role="cell" data-cell={`${row.id}-correction`}>
+                <CorrectionTypePicker
+                  row={row}
+                  rowNumber={index + 1}
+                  onChange={(correctionType) => updateRow(row.id, { correctionType })}
+                />
+                <RichTextEditor
+                  value={row.correction}
+                  label={`${index + 1}행 수정`}
+                  onChange={(value) => updateCell(row.id, 'correction', value)}
+                  onEditorFocus={(editor) => {
+                    activeEditor.current = editor
+                  }}
+                />
+              </div>
               <button
                 type="button"
                 className="delete-row"
@@ -270,6 +283,86 @@ function TableCell({
       />
     </div>
   )
+}
+
+const CORRECTION_TYPES: Array<{
+  value: ReportRow['correctionType']
+  label: string
+}> = [
+  { value: 'none', label: '없음' },
+  { value: 'spacing', label: '띄어쓰기' },
+  { value: 'symbol', label: '기호' },
+  { value: 'properNoun', label: '고유명사' },
+]
+
+function CorrectionTypePicker({
+  row,
+  rowNumber,
+  onChange,
+}: {
+  row: ReportRow
+  rowNumber: number
+  onChange: (type: ReportRow['correctionType']) => void
+}) {
+  return (
+    <div className="correction-types" aria-label={`${rowNumber}행 수정 유형`}>
+      {CORRECTION_TYPES.map((type) => (
+        <label key={type.value}>
+          <input
+            type="radio"
+            name={`correction-type-${row.id}`}
+            checked={row.correctionType === type.value}
+            onChange={() => onChange(type.value)}
+          />
+          {type.label}
+        </label>
+      ))}
+    </div>
+  )
+}
+
+function DateInput({
+  label,
+  value,
+  min,
+  onChange,
+}: {
+  label: string
+  value: string
+  min?: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <div className="slash-date-input">
+      <input
+        value={value}
+        inputMode="numeric"
+        maxLength={10}
+        aria-label={label}
+        onChange={(event) => onChange(formatDateTyping(event.target.value))}
+      />
+      <CalendarDays size={15} aria-hidden="true" />
+      <input
+        className="native-date-picker"
+        type="date"
+        aria-label={`${label} 달력`}
+        value={toIsoDate(value)}
+        min={min ? toIsoDate(min) : undefined}
+        onChange={(event) => onChange(event.target.value.replaceAll('-', '/'))}
+      />
+    </div>
+  )
+}
+
+function formatDateTyping(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+  if (digits.length <= 4) return digits
+  if (digits.length <= 6) return `${digits.slice(0, 4)}/${digits.slice(4)}`
+  return `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`
+}
+
+function toIsoDate(value: string): string {
+  return /^\d{4}\/\d{2}\/\d{2}$/.test(value) ? value.replaceAll('/', '-') : ''
 }
 
 function createRowId(): string {

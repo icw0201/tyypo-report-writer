@@ -24,12 +24,13 @@ describe('클립보드 데이터', () => {
     expect(
       formatReadingDate({
         platform: '',
+        locationUnit: 'episode',
         dateMode: 'calendar',
-        startDate: '2026-09-01',
-        endDate: '2026-09-05',
+        startDate: '2026/09/01',
+        endDate: '2026/09/05',
         directDate: '',
       }),
-    ).toBe('2026-09-01 ~ 2026-09-05')
+    ).toBe('2026/09/01 ~ 2026/09/05')
   })
 
   it('Gmail용 표와 TSV 대체 텍스트를 만든다', () => {
@@ -37,6 +38,7 @@ describe('클립보드 데이터', () => {
       '푸른 밤',
       {
         platform: '리디',
+        locationUnit: 'episode',
         dateMode: 'direct',
         startDate: '',
         endDate: '',
@@ -45,16 +47,16 @@ describe('클립보드 데이터', () => {
       [
         {
           id: '1',
-          unit: 'episode',
           location: '12',
           original: '<strong>됬다</strong>',
           correction: '됐다',
+          correctionType: 'spacing',
         },
       ],
     )
 
     expect(payload.plain).toContain('작품명\t푸른 밤')
-    expect(payload.plain).toContain('1\t12화\t됬다\t됐다')
+    expect(payload.plain).toContain('1\t12화\t됬다\t[띄어쓰기] 됐다')
     expect(payload.html).toContain('border-collapse:collapse')
     expect(payload.html).toContain('<strong>됬다</strong>')
     expect(payload.html).not.toContain('class=')

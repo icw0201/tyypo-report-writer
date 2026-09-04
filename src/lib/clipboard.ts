@@ -54,13 +54,13 @@ export function createTablePayload(
   const plainLines = [
     ...metadata.map(([label, value]) => `${label}\t${value}`),
     '',
-    'num\t화/권(선택)\t본문\t수정',
+    `num\t${locationHeader(reportMeta.locationUnit)}\t본문\t수정`,
     ...rows.map((row, index) =>
       [
         String(index + 1),
-        formatLocation(row),
+        formatLocation(row, reportMeta.locationUnit),
         richHtmlToPlainText(row.original),
-        richHtmlToPlainText(row.correction),
+        formatCorrectionPlain(row),
       ].join('\t'),
     ),
   ]
@@ -80,9 +80,9 @@ export function createTablePayload(
     .map(
       (row, index) =>
         `<tr><td style="${baseCell};text-align:center;width:54px">${index + 1}</td>` +
-        `<td style="${baseCell};width:130px">${escapeHtml(formatLocation(row)) || '&nbsp;'}</td>` +
+        `<td style="${baseCell};width:130px">${escapeHtml(formatLocation(row, reportMeta.locationUnit)) || '&nbsp;'}</td>` +
         `<td style="${baseCell};width:280px">${sanitizeRichHtml(row.original) || '&nbsp;'}</td>` +
-        `<td style="${baseCell};width:280px">${sanitizeRichHtml(row.correction) || '&nbsp;'}</td></tr>`,
+        `<td style="${baseCell};width:280px">${formatCorrectionHtml(row) || '&nbsp;'}</td></tr>`,
     )
     .join('')
 
@@ -91,15 +91,42 @@ export function createTablePayload(
     html:
       `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:760px">` +
       `<tbody>${metadataHtml}` +
-      `<tr><td style="${headerCell};width:54px">num</td><td style="${headerCell};width:130px">화/권(선택)</td>` +
+      `<tr><td style="${headerCell};width:54px">num</td><td style="${headerCell};width:130px">${locationHeader(reportMeta.locationUnit)}</td>` +
       `<td style="${headerCell};width:280px">본문</td><td style="${headerCell};width:280px">수정</td></tr>` +
       `${rowsHtml}</tbody></table>`,
   }
 }
 
-export function formatLocation(row: ReportRow): string {
-  const suffix = row.unit === 'episode' ? '화' : row.unit === 'volume' ? '권' : ''
+export function formatLocation(
+  row: ReportRow,
+  unit: ReportMeta['locationUnit'],
+): string {
+  const suffix = unit === 'episode' ? '화' : unit === 'volume' ? '권' : ''
   return `${row.location}${suffix}`
+}
+
+function locationHeader(unit: ReportMeta['locationUnit']): string {
+  return unit === 'episode' ? '화' : unit === 'volume' ? '권' : '화/권(선택)'
+}
+
+function formatCorrectionPlain(row: ReportRow): string {
+  const type = correctionTypeLabel(row.correctionType)
+  const correction = richHtmlToPlainText(row.correction)
+  return type ? `[${type}] ${correction}`.trim() : correction
+}
+
+function formatCorrectionHtml(row: ReportRow): string {
+  const type = correctionTypeLabel(row.correctionType)
+  const correction = sanitizeRichHtml(row.correction)
+  if (!type) return correction
+  return `<span style="color:#64748b;font-size:12px">[${type}]</span>${correction ? `<br>${correction}` : ''}`
+}
+
+function correctionTypeLabel(type: ReportRow['correctionType']): string {
+  if (type === 'spacing') return '띄어쓰기'
+  if (type === 'symbol') return '기호'
+  if (type === 'properNoun') return '고유명사'
+  return ''
 }
 
 export function formatReadingDate(meta: ReportMeta): string {

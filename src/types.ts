@@ -8,6 +8,7 @@ export interface UserMeta {
 
 export interface ReportMeta {
   platform: string
+  locationUnit: 'episode' | 'volume' | ''
   dateMode: 'calendar' | 'direct'
   startDate: string
   endDate: string
@@ -16,10 +17,10 @@ export interface ReportMeta {
 
 export interface ReportRow {
   id: string
-  unit: 'episode' | 'volume' | ''
   location: string
   original: string
   correction: string
+  correctionType: 'none' | 'spacing' | 'symbol' | 'properNoun'
 }
 
 export type EditableColumn = 'original' | 'correction'

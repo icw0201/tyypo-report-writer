@@ -7,10 +7,17 @@ import { ReportTable } from './ReportTable'
 
 function Harness() {
   const [rows, setRows] = useState<ReportRow[]>([
-    { id: 'first', unit: '', location: '', original: '', correction: '' },
+    {
+      id: 'first',
+      location: '',
+      original: '',
+      correction: '',
+      correctionType: 'none',
+    },
   ])
   const [meta, setMeta] = useState<ReportMeta>({
     platform: '',
+    locationUnit: 'episode',
     dateMode: 'calendar',
     startDate: '',
     endDate: '',
@@ -54,5 +61,27 @@ describe('오탈자 표', () => {
     })
 
     expect(document.execCommand).toHaveBeenCalledWith('insertText', false, '글자만')
+  })
+
+  it('헤더의 권 단위를 모든 위치 입력에 적용하고 수정 유형을 선택한다', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+
+    await user.click(screen.getByRole('radio', { name: '권' }))
+    await user.type(screen.getByRole('textbox', { name: '1행 화 또는 권 숫자' }), '11')
+    await user.click(screen.getByRole('radio', { name: '띄어쓰기' }))
+
+    expect(screen.getByText('권', { selector: '.location-number span' })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: '띄어쓰기' })).toBeChecked()
+  })
+
+  it('달력 날짜를 YYYY/MM/DD 형식으로 입력한다', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+
+    const startDate = screen.getByRole('textbox', { name: '열람 시작일' })
+    await user.type(startDate, '20260905')
+
+    expect(startDate).toHaveValue('2026/09/05')
   })
 })

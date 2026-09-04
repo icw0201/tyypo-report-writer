@@ -20,6 +20,7 @@ function App() {
   const [rows, setRows] = useState<ReportRow[]>(() => [createEmptyRow()])
   const [reportMeta, setReportMeta] = useState<ReportMeta>({
     platform: '',
+    locationUnit: '',
     dateMode: 'calendar',
     startDate: '',
     endDate: '',
@@ -75,6 +76,7 @@ function App() {
     setRows([createEmptyRow()])
     setReportMeta({
       platform: '',
+      locationUnit: '',
       dateMode: 'calendar',
       startDate: '',
       endDate: '',
@@ -256,10 +258,10 @@ function Field({
 function createEmptyRow(): ReportRow {
   return {
     id: globalThis.crypto?.randomUUID?.() ?? `row-${Date.now()}-${Math.random()}`,
-    unit: '',
     location: '',
     original: '',
     correction: '',
+    correctionType: 'none',
   }
 }
 
