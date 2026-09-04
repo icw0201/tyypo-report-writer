@@ -99,4 +99,29 @@ describe('오탈자 표', () => {
     expect(platform).toHaveValue('리디')
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
+
+  it('본문에서 형광펜을 적용한 글자를 빈 수정란에 자동 입력한다', () => {
+    render(<Harness />)
+    const original = screen.getByRole('textbox', { name: '1행 본문' })
+    original.innerHTML =
+      '앞 <span style="background-color: rgb(220, 232, 255)">수정할 글자</span> 뒤'
+    fireEvent.input(original)
+
+    expect(screen.getByRole('textbox', { name: '1행 수정' })).toHaveTextContent(
+      '수정할 글자',
+    )
+  })
+
+  it('수정 유형 추천을 선택하면 수정란 첫 줄에 입력한다', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    await user.click(screen.getByRole('radio', { name: '띄어쓰기' }))
+    await user.click(
+      screen.getByRole('button', { name: '띄어쓰기가 두 개 있습니다.' }),
+    )
+
+    expect(screen.getByRole('textbox', { name: '1행 수정' })).toHaveTextContent(
+      '띄어쓰기가 두 개 있습니다.',
+    )
+  })
 })

@@ -4,7 +4,7 @@
   font-family: Pretendard, "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
   color: #1f2937;
   background: #dfeaff;
-  font-synthesis: none;
+  font-synthesis: style weight;
   text-rendering: optimizeLegibility;
   --primary: #6196f7;
   --primary-dark: #3977e9;
@@ -359,6 +359,13 @@ h2 {
   line-height: 1.55;
 }
 
+.table-help mark {
+  padding: 1px 3px;
+  color: inherit;
+  background: var(--highlight);
+  border-radius: 3px;
+}
+
 .table-scroll {
   overflow-x: auto;
   border: 1px solid #cdd6e3;
@@ -628,6 +635,7 @@ h2 {
 }
 
 .correction-cell {
+  position: relative;
   display: flex;
   flex-direction: column;
 }
@@ -651,6 +659,87 @@ h2 {
 
 .correction-types input {
   accent-color: var(--primary);
+}
+
+.suggestion-popover {
+  position: relative;
+  z-index: 30;
+  width: calc(100% - 16px);
+  margin: 8px;
+  padding: 10px;
+  color: #46546a;
+  background: #fff;
+  border: 1px solid #bdd0f3;
+  border-radius: 11px;
+  box-shadow: 0 14px 32px rgba(31, 50, 81, 0.2);
+}
+
+.suggestion-popover::before {
+  position: absolute;
+  top: -6px;
+  right: 24px;
+  width: 10px;
+  height: 10px;
+  content: "";
+  background: #fff;
+  border-top: 1px solid #bdd0f3;
+  border-left: 1px solid #bdd0f3;
+  transform: rotate(45deg);
+}
+
+.suggestion-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+  color: #42689f;
+  font-size: 0.72rem;
+}
+
+.suggestion-heading button {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: #7b8799;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+}
+
+.suggestion-heading button:hover {
+  background: var(--primary-soft);
+}
+
+.suggestion-group {
+  display: grid;
+  gap: 4px;
+  padding: 6px 0;
+}
+
+.suggestion-group + .suggestion-group {
+  border-top: 1px dashed #d7dfeb;
+}
+
+.suggestion-group button {
+  padding: 7px 8px;
+  color: #516078;
+  background: #f7f9fc;
+  border: 0;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.suggestion-group button:hover {
+  color: #2e67be;
+  background: var(--primary-soft);
+}
+
+.rich-editor em,
+.rich-editor i {
+  font-style: italic;
 }
 
 .location-input {

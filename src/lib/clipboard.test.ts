@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   createBodyPayload,
   createTablePayload,
+  extractHighlightedText,
   formatReadingDate,
   sanitizeRichHtml,
 } from './clipboard'
@@ -56,7 +57,7 @@ describe('클립보드 데이터', () => {
       'https://example.vercel.app',
     )
 
-    expect(payload.plain).toContain('작품명\t푸른 밤')
+    expect(payload.plain).toContain('작품명\t『푸른 밤』')
     expect(payload.plain).toContain('1\t12화\t됬다\t[띄어쓰기] 됐다')
     expect(payload.html).toContain('border-collapse:collapse')
     expect(payload.html).toContain('<strong>됬다</strong>')
@@ -67,5 +68,13 @@ describe('클립보드 데이터', () => {
       '이 표는 오타탈자 제보 작성기(tyypo-report-writer)를 사용해 작성되었습니다.',
     )
     expect(payload.html).not.toContain('class=')
+  })
+
+  it('형광펜이 적용된 글자만 추출한다', () => {
+    expect(
+      extractHighlightedText(
+        '앞 <span style="background-color: rgb(220, 232, 255)">한국어</span> 뒤',
+      ),
+    ).toBe('한국어')
   })
 })

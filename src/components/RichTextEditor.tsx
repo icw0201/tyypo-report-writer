@@ -52,6 +52,7 @@ export function RichTextEditor({
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {
       event.preventDefault()
       applyHighlight(ref.current)
+      ref.current?.dispatchEvent(new InputEvent('input', { bubbles: true }))
       return
     }
     onKeyDown?.(event)
@@ -70,12 +71,34 @@ export function RichTextEditor({
         suppressContentEditableWarning
         data-placeholder={placeholder}
         onFocus={(event) => onEditorFocus?.(event.currentTarget)}
-        onInput={(event) => onChange(event.currentTarget.innerHTML)}
+        onInput={(event) => {
+          replaceTypedArrow(event.currentTarget)
+          onChange(event.currentTarget.innerHTML)
+        }}
         onPaste={handlePaste}
         onKeyDown={handleKeyDown}
       />
     </div>
   )
+}
+
+function replaceTypedArrow(editor: HTMLDivElement): void {
+  const selection = window.getSelection()
+  if (!selection || selection.rangeCount === 0) return
+  const range = selection.getRangeAt(0)
+  if (!editor.contains(range.endContainer) || range.endContainer.nodeType !== Node.TEXT_NODE) {
+    return
+  }
+
+  const textNode = range.endContainer as Text
+  const offset = range.endOffset
+  if (offset < 2 || textNode.data.slice(offset - 2, offset) !== '>>') return
+
+  textNode.replaceData(offset - 2, 2, '→')
+  range.setStart(textNode, offset - 1)
+  range.collapse(true)
+  selection.removeAllRanges()
+  selection.addRange(range)
 }
 
 interface FormattingToolbarProps {

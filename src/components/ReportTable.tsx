@@ -1,5 +1,7 @@
-import { CalendarDays, ChevronDown, Plus, Trash2 } from 'lucide-react'
+import { CalendarDays, ChevronDown, Plus, Trash2, X } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { extractHighlightedText, richHtmlToPlainText } from '../lib/clipboard'
+import { escapeHtml } from '../lib/template'
 import type { EditableColumn, ReportMeta, ReportRow } from '../types'
 import { FormattingToolbar, RichTextEditor } from './RichTextEditor'
 
@@ -22,13 +24,40 @@ export function ReportTable({
 }: ReportTableProps) {
   const activeEditor = useRef<HTMLDivElement | null>(null)
   const activatingGhost = useRef(false)
+  const [suggestionRowId, setSuggestionRowId] = useState<string | null>(null)
 
   const updateMeta = <K extends keyof ReportMeta>(key: K, value: ReportMeta[K]) => {
     onReportMetaChange({ ...reportMeta, [key]: value })
   }
 
   const updateCell = (id: string, column: EditableColumn, value: string) => {
-    onRowsChange(rows.map((row) => (row.id === id ? { ...row, [column]: value } : row)))
+    onRowsChange(
+      rows.map((row) => {
+        if (row.id !== id) return row
+        const next = { ...row, [column]: value }
+        if (
+          column === 'original' &&
+          richHtmlToPlainText(row.correction).trim().length === 0
+        ) {
+          const highlighted = extractHighlightedText(value)
+          if (highlighted) {
+            next.correction = escapeHtml(highlighted).replaceAll('\n', '<br>')
+          }
+        }
+        return next
+      }),
+    )
+  }
+
+  const insertSuggestion = (row: ReportRow, suggestion: string) => {
+    const prefix = escapeHtml(suggestion)
+    const hasCorrection = richHtmlToPlainText(row.correction).trim().length > 0
+    updateCell(
+      row.id,
+      'correction',
+      hasCorrection ? `${prefix}<br>${row.correction}` : prefix,
+    )
+    setSuggestionRowId(null)
   }
 
   const updateRow = (
@@ -76,7 +105,8 @@ export function ReportTable({
 
       <p className="table-help">
         붙여넣기는 글자만 적용됩니다. Enter로 줄을 바꾸고, Tab으로 다음 칸으로 이동하세요.
-        Ctrl+B는 선택한 글자에 하늘색 형광펜을 적용합니다.
+        Ctrl+B는 선택한 글자에 <mark>하늘색 형광펜</mark>을 적용합니다. `&gt;&gt;`를
+        입력하면 → 기호로 자동 변환됩니다.
       </p>
 
       <div className="table-scroll">
@@ -84,7 +114,11 @@ export function ReportTable({
           <div className="report-info-row" role="row">
             <div className="report-info-label" role="rowheader">작품명</div>
             <div role="cell">
-              <input value={workTitle} aria-label="표 작품명" readOnly />
+              <input
+                value={workTitle ? `『${workTitle}』` : ''}
+                aria-label="표 작품명"
+                readOnly
+              />
             </div>
           </div>
           <div className="report-info-row" role="row">
@@ -220,8 +254,20 @@ export function ReportTable({
                 <CorrectionTypePicker
                   row={row}
                   rowNumber={index + 1}
-                  onChange={(correctionType) => updateRow(row.id, { correctionType })}
+                  onChange={(correctionType) => {
+                    updateRow(row.id, { correctionType })
+                    setSuggestionRowId(
+                      ['spacing', 'symbol'].includes(correctionType) ? row.id : null,
+                    )
+                  }}
                 />
+                {suggestionRowId === row.id && (
+                  <SuggestionPopover
+                    type={row.correctionType}
+                    onChoose={(suggestion) => insertSuggestion(row, suggestion)}
+                    onClose={() => setSuggestionRowId(null)}
+                  />
+                )}
                 <RichTextEditor
                   value={row.correction}
                   label={`${index + 1}행 수정`}
@@ -300,6 +346,60 @@ const CORRECTION_TYPES: Array<{
   { value: 'symbol', label: '기호' },
   { value: 'properNoun', label: '고유명사' },
 ]
+
+const SUGGESTIONS: Partial<
+  Record<ReportRow['correctionType'], string[][]>
+> = {
+  spacing: [
+    ['띄어쓰기가 두 개 있습니다.', '기호 사이 띄어쓰기가 없습니다.'],
+  ],
+  symbol: [
+    ['문장 끝 마침표가 없습니다.'],
+    ['대사 시작 말따옴표가 없습니다.', '대사 끝 말따옴표가 없습니다.'],
+    [
+      '작은 따옴표가 아닌 큰 따옴표가 되어야 할 것 같습니다.',
+      '큰 따옴표가 아닌 작은 따옴표가 되어야 할 것 같습니다.',
+    ],
+    ['따옴표 기호의 방향이 반대로 사용되었습니다.'],
+  ],
+}
+
+function SuggestionPopover({
+  type,
+  onChoose,
+  onClose,
+}: {
+  type: ReportRow['correctionType']
+  onChoose: (suggestion: string) => void
+  onClose: () => void
+}) {
+  const groups = SUGGESTIONS[type]
+  if (!groups) return null
+
+  return (
+    <aside className="suggestion-popover" aria-label="자주 쓰는 수정 설명">
+      <div className="suggestion-heading">
+        <strong>자주 쓰는 설명</strong>
+        <button type="button" aria-label="추천 닫기" onClick={onClose}>
+          <X size={14} />
+        </button>
+      </div>
+      {groups.map((group, groupIndex) => (
+        <div className="suggestion-group" key={groupIndex}>
+          {group.map((suggestion) => (
+            <button
+              type="button"
+              key={suggestion}
+              onClick={() => onChoose(suggestion)}
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      ))}
+    </aside>
+  )
+}
 
 function PlatformCombobox({
   value,

@@ -49,7 +49,7 @@ export function createTablePayload(
   const attribution =
     '이 표는 오타탈자 제보 작성기(tyypo-report-writer)를 사용해 작성되었습니다.'
   const metadata = [
-    ['작품명', workTitle],
+    ['작품명', workTitle ? `『${workTitle}』` : ''],
     ['열람 플랫폼', reportMeta.platform],
     ['열람 일자', formatReadingDate(reportMeta)],
   ]
@@ -168,6 +168,21 @@ export function richHtmlToPlainText(html: string): string {
     .replace(/\u00a0/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+}
+
+export function extractHighlightedText(html: string): string {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html')
+  const highlighted = Array.from(doc.querySelectorAll('mark, span, font'))
+    .filter(
+      (element) =>
+        element.tagName === 'MARK' ||
+        (element instanceof HTMLElement && element.style.backgroundColor.length > 0),
+    )
+    .map((element) => element.textContent?.trim() ?? '')
+    .filter(Boolean)
+
+  return [...new Set(highlighted)].join('\n')
 }
 
 function serializeSafeNode(node: Node): string {
