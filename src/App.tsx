@@ -1,4 +1,4 @@
-import { Check, Copy, FilePenLine, RefreshCcw, ShieldCheck, Sparkles, Trash2 } from 'lucide-react'
+import { Check, Copy, FilePenLine, Mail, RefreshCcw, ShieldCheck, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { ReportTable } from './components/ReportTable'
 import { RichTextEditor } from './components/RichTextEditor'
@@ -57,7 +57,9 @@ function App() {
       if (kind === 'subject') await writeClipboard({ plain: subject })
       if (kind === 'body') await writeClipboard(createBodyPayload(bodyHtml))
       if (kind === 'table') {
-        await writeClipboard(createTablePayload(meta.workTitle, reportMeta, rows))
+        await writeClipboard(
+          createTablePayload(meta.workTitle, reportMeta, rows, getPublicProjectUrl()),
+        )
       }
       setCopied(kind)
     } catch {
@@ -222,8 +224,8 @@ function App() {
         </div>
 
         <footer>
-          <Sparkles size={15} />
-          서버 없이 브라우저에서만 작동합니다.
+          <Mail size={15} />
+          문의·제안·건의 <a href="mailto:gaebal0201@gmail.com">gaebal0201@gmail.com</a>
         </footer>
       </div>
     </main>
@@ -263,6 +265,11 @@ function createEmptyRow(): ReportRow {
     correction: '',
     correctionType: 'none',
   }
+}
+
+function getPublicProjectUrl(): string {
+  if (['localhost', '127.0.0.1'].includes(window.location.hostname)) return ''
+  return window.location.origin
 }
 
 function Required() {

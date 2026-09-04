@@ -53,12 +53,19 @@ describe('클립보드 데이터', () => {
           correctionType: 'spacing',
         },
       ],
+      'https://example.vercel.app',
     )
 
     expect(payload.plain).toContain('작품명\t푸른 밤')
     expect(payload.plain).toContain('1\t12화\t됬다\t[띄어쓰기] 됐다')
     expect(payload.html).toContain('border-collapse:collapse')
     expect(payload.html).toContain('<strong>됬다</strong>')
+    expect(payload.html).toContain(
+      'href="https://example.vercel.app"',
+    )
+    expect(payload.plain).toContain(
+      '이 표는 오타탈자 제보 작성기(tyypo-report-writer)를 사용해 작성되었습니다.',
+    )
     expect(payload.html).not.toContain('class=')
   })
 })

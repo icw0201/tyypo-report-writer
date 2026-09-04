@@ -44,7 +44,10 @@ export function createTablePayload(
   workTitle: string,
   reportMeta: ReportMeta,
   rows: ReportRow[],
+  projectUrl = '',
 ): ClipboardPayload {
+  const attribution =
+    '이 표는 오타탈자 제보 작성기(tyypo-report-writer)를 사용해 작성되었습니다.'
   const metadata = [
     ['작품명', workTitle],
     ['열람 플랫폼', reportMeta.platform],
@@ -63,6 +66,8 @@ export function createTablePayload(
         formatCorrectionPlain(row),
       ].join('\t'),
     ),
+    '',
+    attribution,
   ]
 
   const baseCell =
@@ -85,6 +90,13 @@ export function createTablePayload(
         `<td style="${baseCell};width:280px">${formatCorrectionHtml(row) || '&nbsp;'}</td></tr>`,
     )
     .join('')
+  const safeProjectUrl = /^https?:\/\//.test(projectUrl) ? escapeHtml(projectUrl) : ''
+  const projectName = safeProjectUrl
+    ? `<a href="${safeProjectUrl}" style="color:#3974d8;text-decoration:underline">tyypo-report-writer</a>`
+    : 'tyypo-report-writer'
+  const attributionHtml =
+    `<tr><td colspan="4" style="${baseCell};color:#64748b;background-color:#f8fafc;font-size:12px;text-align:center">` +
+    `이 표는 오타탈자 제보 작성기(${projectName})를 사용해 작성되었습니다.</td></tr>`
 
   return {
     plain: plainLines.join('\n'),
@@ -93,7 +105,7 @@ export function createTablePayload(
       `<tbody>${metadataHtml}` +
       `<tr><td style="${headerCell};width:54px">num</td><td style="${headerCell};width:130px">${locationHeader(reportMeta.locationUnit)}</td>` +
       `<td style="${headerCell};width:280px">본문</td><td style="${headerCell};width:280px">수정</td></tr>` +
-      `${rowsHtml}</tbody></table>`,
+      `${rowsHtml}${attributionHtml}</tbody></table>`,
   }
 }
 

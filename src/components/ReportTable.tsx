@@ -1,5 +1,5 @@
-import { CalendarDays, Plus, Trash2 } from 'lucide-react'
-import { useRef } from 'react'
+import { CalendarDays, ChevronDown, Plus, Trash2 } from 'lucide-react'
+import { useRef, useState } from 'react'
 import type { EditableColumn, ReportMeta, ReportRow } from '../types'
 import { FormattingToolbar, RichTextEditor } from './RichTextEditor'
 
@@ -72,7 +72,6 @@ export function ReportTable({
           <p className="eyebrow">REPORT TABLE</p>
           <h2 id="report-table-heading">오탈자 목록</h2>
         </div>
-        <FormattingToolbar getEditor={() => activeEditor.current} compact />
       </div>
 
       <p className="table-help">
@@ -91,17 +90,10 @@ export function ReportTable({
           <div className="report-info-row" role="row">
             <div className="report-info-label" role="rowheader">열람 플랫폼</div>
             <div role="cell">
-              <input
-                list="platform-options"
+              <PlatformCombobox
                 value={reportMeta.platform}
-                aria-label="열람 플랫폼"
-                onChange={(event) => updateMeta('platform', event.target.value)}
+                onChange={(value) => updateMeta('platform', value)}
               />
-              <datalist id="platform-options">
-                {PLATFORMS.map((platform) => (
-                  <option key={platform} value={platform} />
-                ))}
-              </datalist>
             </div>
           </div>
           <div className="report-info-row" role="row">
@@ -148,10 +140,20 @@ export function ReportTable({
               )}
             </div>
           </div>
+          <div className="report-tools-row">
+            <span>글자 서식</span>
+            <FormattingToolbar getEditor={() => activeEditor.current} compact />
+          </div>
           <div className="report-row report-row--header" role="row">
             <div role="columnheader">num</div>
             <div className="location-header" role="columnheader">
-              <span>화/권(선택)</span>
+              <span>
+                {reportMeta.locationUnit === 'episode'
+                  ? '화'
+                  : reportMeta.locationUnit === 'volume'
+                    ? '권'
+                    : '화/권(선택)'}
+              </span>
               <div className="header-unit-toggle" aria-label="화 또는 권 단위">
                 <label>
                   <input
@@ -179,7 +181,11 @@ export function ReportTable({
           </div>
 
           {rows.map((row, index) => (
-            <div className="report-row" role="row" key={row.id}>
+            <div
+              className={`report-row report-row--data ${index % 2 === 1 ? 'is-alt' : ''}`}
+              role="row"
+              key={row.id}
+            >
               <div className="number-cell" role="cell">
                 {index + 1}
               </div>
@@ -294,6 +300,65 @@ const CORRECTION_TYPES: Array<{
   { value: 'symbol', label: '기호' },
   { value: 'properNoun', label: '고유명사' },
 ]
+
+function PlatformCombobox({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const filteredPlatforms = PLATFORMS.filter((platform) =>
+    platform.toLowerCase().includes(value.toLowerCase()),
+  )
+  const options = filteredPlatforms.length > 0 ? filteredPlatforms : PLATFORMS
+
+  return (
+    <div className="platform-combobox">
+      <input
+        role="combobox"
+        aria-label="열람 플랫폼"
+        aria-expanded={open}
+        aria-controls="platform-listbox"
+        value={value}
+        onFocus={() => setOpen(true)}
+        onBlur={() => window.setTimeout(() => setOpen(false), 100)}
+        onChange={(event) => {
+          onChange(event.target.value)
+          setOpen(true)
+        }}
+      />
+      <button
+        type="button"
+        aria-label="열람 플랫폼 목록 열기"
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <ChevronDown size={16} />
+      </button>
+      {open && (
+        <div id="platform-listbox" className="platform-options" role="listbox">
+          {options.map((platform) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={value === platform}
+              key={platform}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                onChange(platform)
+                setOpen(false)
+              }}
+            >
+              {platform}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function CorrectionTypePicker({
   row,

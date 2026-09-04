@@ -71,6 +71,8 @@ describe('오탈자 표', () => {
     await user.type(screen.getByRole('textbox', { name: '1행 화 또는 권 숫자' }), '11')
     await user.click(screen.getByRole('radio', { name: '띄어쓰기' }))
 
+    const locationHeader = screen.getByRole('columnheader', { name: /권/ })
+    expect(locationHeader.querySelector(':scope > span')).toHaveTextContent('권')
     expect(screen.getByText('권', { selector: '.location-number span' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: '띄어쓰기' })).toBeChecked()
   })
@@ -83,5 +85,18 @@ describe('오탈자 표', () => {
     await user.type(startDate, '20260905')
 
     expect(startDate).toHaveValue('2026/09/05')
+  })
+
+  it('플랫폼 선택 목록을 입력창에 연결해 표시한다', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+
+    const platform = screen.getByRole('combobox', { name: '열람 플랫폼' })
+    await user.click(platform)
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
+    await user.click(screen.getByRole('option', { name: '리디' }))
+
+    expect(platform).toHaveValue('리디')
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
 })

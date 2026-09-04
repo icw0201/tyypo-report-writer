@@ -408,6 +408,59 @@ h2 {
   background: #f7f9fb;
 }
 
+.platform-combobox {
+  position: relative;
+  width: 100%;
+}
+
+.platform-combobox > input {
+  padding-right: 38px;
+}
+
+.platform-combobox > button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 36px;
+  color: #657287;
+  background: transparent;
+  border: 0;
+}
+
+.platform-options {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 5px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid #cfd8e6;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(31, 50, 81, 0.17);
+}
+
+.platform-options button {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  color: #344054;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  text-align: left;
+}
+
+.platform-options button:hover,
+.platform-options button[aria-selected="true"] {
+  color: #2d68c5;
+  background: var(--primary-soft);
+}
+
 .report-date-cell {
   gap: 10px;
 }
@@ -447,6 +500,29 @@ h2 {
 .report-row {
   display: grid;
   grid-template-columns: 56px 144px minmax(260px, 1fr) minmax(260px, 1fr) 42px;
+}
+
+.report-tools-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 46px;
+  padding: 6px 10px;
+  color: #778397;
+  background: #f7f9fc;
+  border-bottom: 1px solid #d8e0eb;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.report-tools-row .format-toolbar {
+  padding: 2px;
+  background: #fff;
+}
+
+.report-tools-row .format-button {
+  width: 29px;
+  height: 29px;
 }
 
 .report-row > * {
@@ -532,6 +608,16 @@ h2 {
   background: #f8fafc;
   font-size: 0.8rem;
   font-weight: 800;
+}
+
+.report-row--data.is-alt,
+.report-row--data.is-alt .number-cell,
+.report-row--data.is-alt .delete-row {
+  background: #f5f8ff;
+}
+
+.report-row--data.is-alt .correction-types {
+  background: #edf3ff;
 }
 
 .location-cell {
@@ -679,6 +765,16 @@ footer {
   margin-top: 28px;
   color: #8a95a7;
   font-size: 0.74rem;
+}
+
+footer a {
+  color: #5d79a4;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
 }
 
 @media (max-width: 850px) {

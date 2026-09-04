@@ -4,7 +4,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
   type RefObject,
-  useEffect,
+  useLayoutEffect,
   useRef,
 } from 'react'
 import { applyHighlight } from '../lib/richText'
@@ -35,7 +35,7 @@ export function RichTextEditor({
   const localRef = useRef<HTMLDivElement>(null)
   const ref = editorRef ?? localRef
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = ref.current
     if (element && document.activeElement !== element && element.innerHTML !== value) {
       element.innerHTML = value
@@ -69,7 +69,6 @@ export function RichTextEditor({
         contentEditable
         suppressContentEditableWarning
         data-placeholder={placeholder}
-        dangerouslySetInnerHTML={{ __html: value }}
         onFocus={(event) => onEditorFocus?.(event.currentTarget)}
         onInput={(event) => onChange(event.currentTarget.innerHTML)}
         onPaste={handlePaste}
