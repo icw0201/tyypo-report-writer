@@ -58,7 +58,7 @@ export function createTablePayload(
     ...rows.map((row, index) =>
       [
         String(index + 1),
-        richHtmlToPlainText(row.location),
+        formatLocation(row),
         richHtmlToPlainText(row.original),
         richHtmlToPlainText(row.correction),
       ].join('\t'),
@@ -80,7 +80,7 @@ export function createTablePayload(
     .map(
       (row, index) =>
         `<tr><td style="${baseCell};text-align:center;width:54px">${index + 1}</td>` +
-        `<td style="${baseCell};width:130px">${sanitizeRichHtml(row.location) || '&nbsp;'}</td>` +
+        `<td style="${baseCell};width:130px">${escapeHtml(formatLocation(row)) || '&nbsp;'}</td>` +
         `<td style="${baseCell};width:280px">${sanitizeRichHtml(row.original) || '&nbsp;'}</td>` +
         `<td style="${baseCell};width:280px">${sanitizeRichHtml(row.correction) || '&nbsp;'}</td></tr>`,
     )
@@ -95,6 +95,11 @@ export function createTablePayload(
       `<td style="${headerCell};width:280px">본문</td><td style="${headerCell};width:280px">수정</td></tr>` +
       `${rowsHtml}</tbody></table>`,
   }
+}
+
+export function formatLocation(row: ReportRow): string {
+  const suffix = row.unit === 'episode' ? '화' : row.unit === 'volume' ? '권' : ''
+  return `${row.location}${suffix}`
 }
 
 export function formatReadingDate(meta: ReportMeta): string {

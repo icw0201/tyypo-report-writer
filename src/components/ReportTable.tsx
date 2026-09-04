@@ -31,14 +31,21 @@ export function ReportTable({
     onRowsChange(rows.map((row) => (row.id === id ? { ...row, [column]: value } : row)))
   }
 
+  const updateLocation = (
+    id: string,
+    update: Pick<ReportRow, 'unit'> | Pick<ReportRow, 'location'>,
+  ) => {
+    onRowsChange(rows.map((row) => (row.id === id ? { ...row, ...update } : row)))
+  }
+
   const addRow = () => {
     if (activatingGhost.current) return
     activatingGhost.current = true
     const id = createRowId()
-    onRowsChange([...rows, { id, location: '', original: '', correction: '' }])
+    onRowsChange([...rows, { id, unit: '', location: '', original: '', correction: '' }])
     requestAnimationFrame(() => {
-      const editor = document.querySelector<HTMLDivElement>(
-        `[data-cell="${id}-location"] [contenteditable="true"]`,
+      const editor = document.querySelector<HTMLInputElement>(
+        `[data-cell="${id}-location"] .location-input`,
       )
       editor?.focus()
       activatingGhost.current = false
@@ -46,6 +53,10 @@ export function ReportTable({
   }
 
   const removeRow = (id: string) => {
+    if (rows.length === 1) {
+      onRowsChange([{ id, unit: '', location: '', original: '', correction: '' }])
+      return
+    }
     onRowsChange(rows.filter((row) => row.id !== id))
   }
 
@@ -59,73 +70,6 @@ export function ReportTable({
         <FormattingToolbar getEditor={() => activeEditor.current} compact />
       </div>
 
-      <div className="report-meta-grid">
-        <label className="field field--wide">
-          <span>작품명</span>
-          <input value={workTitle} placeholder="위 사용자 입력란에서 입력" readOnly />
-        </label>
-        <label className="field field--wide">
-          <span>열람 플랫폼</span>
-          <input
-            list="platform-options"
-            value={reportMeta.platform}
-            placeholder="선택하거나 직접 입력"
-            onChange={(event) => updateMeta('platform', event.target.value)}
-          />
-          <datalist id="platform-options">
-            {PLATFORMS.map((platform) => (
-              <option key={platform} value={platform} />
-            ))}
-          </datalist>
-        </label>
-
-        <div className="field field--date">
-          <span>열람 일자</span>
-          <div className="segmented" aria-label="날짜 입력 방식">
-            <button
-              type="button"
-              className={reportMeta.dateMode === 'calendar' ? 'is-active' : ''}
-              onClick={() => updateMeta('dateMode', 'calendar')}
-            >
-              <CalendarDays size={15} />
-              달력
-            </button>
-            <button
-              type="button"
-              className={reportMeta.dateMode === 'direct' ? 'is-active' : ''}
-              onClick={() => updateMeta('dateMode', 'direct')}
-            >
-              직접 입력
-            </button>
-          </div>
-          {reportMeta.dateMode === 'calendar' ? (
-            <div className="date-range">
-              <input
-                type="date"
-                aria-label="열람 시작일"
-                value={reportMeta.startDate}
-                onChange={(event) => updateMeta('startDate', event.target.value)}
-              />
-              <span>~</span>
-              <input
-                type="date"
-                aria-label="열람 종료일"
-                min={reportMeta.startDate || undefined}
-                value={reportMeta.endDate}
-                onChange={(event) => updateMeta('endDate', event.target.value)}
-              />
-            </div>
-          ) : (
-            <input
-              value={reportMeta.directDate}
-              placeholder="예: 2026. 9. 1. ~ 2026. 9. 5."
-              aria-label="열람 일자 직접 입력"
-              onChange={(event) => updateMeta('directDate', event.target.value)}
-            />
-          )}
-        </div>
-      </div>
-
       <p className="table-help">
         붙여넣기는 글자만 적용됩니다. Enter로 줄을 바꾸고, Tab으로 다음 칸으로 이동하세요.
         Ctrl+B는 선택한 글자에 하늘색 형광펜을 적용합니다.
@@ -133,6 +77,74 @@ export function ReportTable({
 
       <div className="table-scroll">
         <div className="report-table" role="table" aria-label="오탈자 제보 표">
+          <div className="report-info-row" role="row">
+            <div className="report-info-label" role="rowheader">작품명</div>
+            <div role="cell">
+              <input value={workTitle} aria-label="표 작품명" readOnly />
+            </div>
+          </div>
+          <div className="report-info-row" role="row">
+            <div className="report-info-label" role="rowheader">열람 플랫폼</div>
+            <div role="cell">
+              <input
+                list="platform-options"
+                value={reportMeta.platform}
+                aria-label="열람 플랫폼"
+                onChange={(event) => updateMeta('platform', event.target.value)}
+              />
+              <datalist id="platform-options">
+                {PLATFORMS.map((platform) => (
+                  <option key={platform} value={platform} />
+                ))}
+              </datalist>
+            </div>
+          </div>
+          <div className="report-info-row" role="row">
+            <div className="report-info-label" role="rowheader">열람 일자</div>
+            <div className="report-date-cell" role="cell">
+              <div className="segmented" aria-label="날짜 입력 방식">
+                <button
+                  type="button"
+                  className={reportMeta.dateMode === 'calendar' ? 'is-active' : ''}
+                  onClick={() => updateMeta('dateMode', 'calendar')}
+                >
+                  <CalendarDays size={15} />
+                  달력
+                </button>
+                <button
+                  type="button"
+                  className={reportMeta.dateMode === 'direct' ? 'is-active' : ''}
+                  onClick={() => updateMeta('dateMode', 'direct')}
+                >
+                  직접 입력
+                </button>
+              </div>
+              {reportMeta.dateMode === 'calendar' ? (
+                <div className="date-range">
+                  <input
+                    type="date"
+                    aria-label="열람 시작일"
+                    value={reportMeta.startDate}
+                    onChange={(event) => updateMeta('startDate', event.target.value)}
+                  />
+                  <span>~</span>
+                  <input
+                    type="date"
+                    aria-label="열람 종료일"
+                    min={reportMeta.startDate || undefined}
+                    value={reportMeta.endDate}
+                    onChange={(event) => updateMeta('endDate', event.target.value)}
+                  />
+                </div>
+              ) : (
+                <input
+                  value={reportMeta.directDate}
+                  aria-label="열람 일자 직접 입력"
+                  onChange={(event) => updateMeta('directDate', event.target.value)}
+                />
+              )}
+            </div>
+          </div>
           <div className="report-row report-row--header" role="row">
             <div role="columnheader">num</div>
             <div role="columnheader">화/권(선택)</div>
@@ -146,21 +158,46 @@ export function ReportTable({
               <div className="number-cell" role="cell">
                 {index + 1}
               </div>
-              <TableCell
-                row={row}
-                column="location"
-                label={`${index + 1}행 화 또는 권`}
-                placeholder="예: 12화"
-                onChange={updateCell}
-                onFocus={(editor) => {
-                  activeEditor.current = editor
-                }}
-              />
+              <div className="location-cell" role="cell" data-cell={`${row.id}-location`}>
+                <div className="unit-toggle" aria-label={`${index + 1}행 단위`}>
+                  <label>
+                    <input
+                      type="radio"
+                      name={`unit-${row.id}`}
+                      checked={row.unit === 'episode'}
+                      onChange={() => updateLocation(row.id, { unit: 'episode' })}
+                    />
+                    화
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name={`unit-${row.id}`}
+                      checked={row.unit === 'volume'}
+                      onChange={() => updateLocation(row.id, { unit: 'volume' })}
+                    />
+                    권
+                  </label>
+                </div>
+                <div className="location-number">
+                  <input
+                    className="location-input"
+                    inputMode="numeric"
+                    aria-label={`${index + 1}행 화 또는 권 숫자`}
+                    value={row.location}
+                    onChange={(event) =>
+                      updateLocation(row.id, {
+                        location: event.target.value.replace(/\D/g, ''),
+                      })
+                    }
+                  />
+                  {row.unit && <span>{row.unit === 'episode' ? '화' : '권'}</span>}
+                </div>
+              </div>
               <TableCell
                 row={row}
                 column="original"
                 label={`${index + 1}행 본문`}
-                placeholder="오탈자가 있는 본문"
                 onChange={updateCell}
                 onFocus={(editor) => {
                   activeEditor.current = editor
@@ -170,7 +207,6 @@ export function ReportTable({
                 row={row}
                 column="correction"
                 label={`${index + 1}행 수정`}
-                placeholder="수정할 내용"
                 onChange={updateCell}
                 onFocus={(editor) => {
                   activeEditor.current = editor
@@ -213,7 +249,6 @@ interface TableCellProps {
   row: ReportRow
   column: EditableColumn
   label: string
-  placeholder: string
   onChange: (id: string, column: EditableColumn, value: string) => void
   onFocus: (editor: HTMLDivElement) => void
 }
@@ -222,7 +257,6 @@ function TableCell({
   row,
   column,
   label,
-  placeholder,
   onChange,
   onFocus,
 }: TableCellProps) {
@@ -231,7 +265,6 @@ function TableCell({
       <RichTextEditor
         value={row[column]}
         label={label}
-        placeholder={placeholder}
         onChange={(value) => onChange(row.id, column, value)}
         onEditorFocus={onFocus}
       />

@@ -6,7 +6,9 @@ import type { ReportMeta, ReportRow } from '../types'
 import { ReportTable } from './ReportTable'
 
 function Harness() {
-  const [rows, setRows] = useState<ReportRow[]>([])
+  const [rows, setRows] = useState<ReportRow[]>([
+    { id: 'first', unit: '', location: '', original: '', correction: '' },
+  ])
   const [meta, setMeta] = useState<ReportMeta>({
     platform: '',
     dateMode: 'calendar',
@@ -30,20 +32,19 @@ describe('오탈자 표', () => {
     document.execCommand = vi.fn(() => true)
   })
 
-  it('회색 추가 행을 선택하면 한 행을 활성화한다', async () => {
+  it('첫 행이 존재하고 회색 추가 행을 선택하면 다음 행을 활성화한다', async () => {
     const user = userEvent.setup()
     render(<Harness />)
-
-    await user.click(screen.getByRole('button', { name: '새 오탈자 행 추가' }))
 
     expect(screen.getByRole('textbox', { name: '1행 본문' })).toBeInTheDocument()
-    expect(screen.queryByRole('textbox', { name: '2행 본문' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '새 오탈자 행 추가' }))
+
+    expect(screen.getByRole('textbox', { name: '2행 본문' })).toBeInTheDocument()
+    expect(screen.queryByRole('textbox', { name: '3행 본문' })).not.toBeInTheDocument()
   })
 
-  it('셀에 붙여넣을 때 일반 텍스트만 삽입한다', async () => {
-    const user = userEvent.setup()
+  it('셀에 붙여넣을 때 일반 텍스트만 삽입한다', () => {
     render(<Harness />)
-    await user.click(screen.getByRole('button', { name: '새 오탈자 행 추가' }))
     const cell = screen.getByRole('textbox', { name: '1행 본문' })
 
     fireEvent.paste(cell, {

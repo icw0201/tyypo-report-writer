@@ -45,7 +45,8 @@ describe('클립보드 데이터', () => {
       [
         {
           id: '1',
-          location: '12화',
+          unit: 'episode',
+          location: '12',
           original: '<strong>됬다</strong>',
           correction: '됐다',
         },

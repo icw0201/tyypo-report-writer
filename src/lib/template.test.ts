@@ -22,4 +22,19 @@ describe('메일 기본 문안', () => {
     expect(body).not.toContain('<script>')
     expect(body).toContain('독자 독자 드림')
   })
+
+  it('선택 입력이 비어도 제목과 본문이 자연스럽다', () => {
+    const optionalEmpty = {
+      reporterName: '',
+      workTitle: '푸른 밤',
+      genre: '',
+      publisher: '',
+      authorName: '',
+    }
+    expect(createDefaultSubject(optionalEmpty)).toBe(
+      '[오탈자 제보] 《푸른 밤》 오탈자 제보 드립니다',
+    )
+    expect(createDefaultBody(optionalEmpty)).toContain('연재 중인 《푸른 밤》')
+    expect(createDefaultBody(optionalEmpty)).toContain('<br>독자 드림')
+  })
 })

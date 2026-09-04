@@ -16,9 +16,10 @@ export interface ReportMeta {
 
 export interface ReportRow {
   id: string
+  unit: 'episode' | 'volume' | ''
   location: string
   original: string
   correction: string
 }
 
-export type EditableColumn = 'location' | 'original' | 'correction'
+export type EditableColumn = 'original' | 'correction'

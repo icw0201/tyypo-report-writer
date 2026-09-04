@@ -17,7 +17,7 @@ function App() {
   const [bodyHtml, setBodyHtml] = useState(() => createDefaultBody(meta))
   const [subjectEdited, setSubjectEdited] = useState(false)
   const [bodyEdited, setBodyEdited] = useState(false)
-  const [rows, setRows] = useState<ReportRow[]>([])
+  const [rows, setRows] = useState<ReportRow[]>(() => [createEmptyRow()])
   const [reportMeta, setReportMeta] = useState<ReportMeta>({
     platform: '',
     dateMode: 'calendar',
@@ -72,7 +72,7 @@ function App() {
     setBodyHtml(createDefaultBody(EMPTY_USER_META))
     setSubjectEdited(false)
     setBodyEdited(false)
-    setRows([])
+    setRows([createEmptyRow()])
     setReportMeta({
       platform: '',
       dateMode: 'calendar',
@@ -122,12 +122,13 @@ function App() {
             />
             <Field
               label="작품명"
+              required
               value={meta.workTitle}
               placeholder="작품명을 입력하세요"
               onChange={(value) => updateMeta('workTitle', value)}
             />
             <label className="field">
-              <span>장르 <Required /></span>
+              <span>장르</span>
               <select value={meta.genre} onChange={(event) => updateMeta('genre', event.target.value)}>
                 <option value="">장르 선택</option>
                 <option>판타지</option>
@@ -231,16 +232,18 @@ function Field({
   label,
   value,
   placeholder,
+  required = false,
   onChange,
 }: {
   label: string
   value: string
   placeholder: string
+  required?: boolean
   onChange: (value: string) => void
 }) {
   return (
     <label className="field">
-      <span>{label} <Required /></span>
+      <span>{label} {required && <Required />}</span>
       <input
         value={value}
         placeholder={placeholder}
@@ -248,6 +251,16 @@ function Field({
       />
     </label>
   )
+}
+
+function createEmptyRow(): ReportRow {
+  return {
+    id: globalThis.crypto?.randomUUID?.() ?? `row-${Date.now()}-${Math.random()}`,
+    unit: '',
+    location: '',
+    original: '',
+    correction: '',
+  }
 }
 
 function Required() {

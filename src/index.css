@@ -321,17 +321,6 @@ h2 {
   background: var(--highlight);
 }
 
-.report-meta-grid {
-  display: grid;
-  grid-template-columns: minmax(180px, 0.8fr) minmax(200px, 1fr) minmax(320px, 1.5fr);
-  gap: 14px;
-  align-items: end;
-}
-
-.field--date {
-  align-content: start;
-}
-
 .segmented {
   display: inline-flex;
   width: fit-content;
@@ -378,6 +367,53 @@ h2 {
 
 .report-table {
   min-width: 790px;
+}
+
+.report-info-row {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  min-height: 52px;
+  border-bottom: 1px solid #d8e0eb;
+}
+
+.report-info-row > div {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 7px 10px;
+}
+
+.report-info-label {
+  color: #315d9f;
+  background: var(--primary-soft);
+  border-right: 1px solid #d8e0eb;
+  font-size: 0.81rem;
+  font-weight: 800;
+}
+
+.report-info-row input {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 9px;
+  color: #263246;
+  background: #fff;
+  border: 1px solid #d2dae6;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.report-info-row input[readonly] {
+  color: #657287;
+  background: #f7f9fb;
+}
+
+.report-date-cell {
+  gap: 10px;
+}
+
+.report-date-cell .date-range {
+  flex: 1;
 }
 
 .report-row {
@@ -436,6 +472,65 @@ h2 {
   background: #f8fafc;
   font-size: 0.8rem;
   font-weight: 800;
+}
+
+.location-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  justify-content: center;
+  padding: 8px;
+}
+
+.unit-toggle {
+  display: flex;
+  gap: 10px;
+  color: #5d6b80;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.unit-toggle label {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.unit-toggle input {
+  margin: 0;
+  accent-color: var(--primary);
+}
+
+.location-input {
+  width: 100%;
+  min-height: 29px;
+  padding: 4px 7px;
+  border: 1px solid #d2dae6;
+  border-radius: 6px;
+}
+
+.location-number {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.location-number span {
+  position: absolute;
+  right: 8px;
+  color: #5d6b80;
+  font-size: 0.79rem;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.location-number:has(span) .location-input {
+  padding-right: 26px;
+}
+
+.location-input:focus {
+  border-color: var(--primary);
+  outline: none;
 }
 
 .delete-row {
@@ -531,8 +626,7 @@ footer {
     border-radius: 0;
   }
 
-  .form-grid,
-  .report-meta-grid {
+  .form-grid {
     grid-template-columns: 1fr;
   }
 }
