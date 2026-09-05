@@ -1,5 +1,6 @@
 import { CalendarDays, ChevronDown, Plus, Trash2, X } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { extractHighlightedText, richHtmlToPlainText } from '../lib/clipboard'
 import { escapeHtml } from '../lib/template'
 import type { EditableColumn, ReportMeta, ReportRow } from '../types'
@@ -24,7 +25,10 @@ export function ReportTable({
 }: ReportTableProps) {
   const activeEditor = useRef<HTMLDivElement | null>(null)
   const activatingGhost = useRef(false)
-  const [suggestionRowId, setSuggestionRowId] = useState<string | null>(null)
+  const [suggestion, setSuggestion] = useState<{
+    rowId: string
+    anchor: HTMLElement
+  } | null>(null)
 
   const updateMeta = <K extends keyof ReportMeta>(key: K, value: ReportMeta[K]) => {
     onReportMetaChange({ ...reportMeta, [key]: value })
@@ -60,7 +64,7 @@ export function ReportTable({
       'correction',
       hasCorrection ? `${prefix}<br>${row.correction}` : prefix,
     )
-    setSuggestionRowId(null)
+    setSuggestion(null)
   }
 
   const updateRow = (
@@ -107,7 +111,7 @@ export function ReportTable({
           !target.closest('.suggestion-popover') &&
           !target.closest('.correction-types')
         ) {
-          setSuggestionRowId(null)
+          setSuggestion(null)
         }
       }}
     >
@@ -201,7 +205,7 @@ export function ReportTable({
                   ? '화'
                   : reportMeta.locationUnit === 'volume'
                     ? '권'
-                    : '화/권(선택)'}
+                    : '화/권'}
               </span>
               <div className="header-unit-toggle" aria-label="화 또는 권 단위">
                 <label>
@@ -250,7 +254,7 @@ export function ReportTable({
                         location: event.target.value.replace(/\D/g, ''),
                       })
                     }
-                    onFocus={() => setSuggestionRowId(null)}
+                    onFocus={() => setSuggestion(null)}
                   />
                   {reportMeta.locationUnit && (
                     <span>{reportMeta.locationUnit === 'episode' ? '화' : '권'}</span>
@@ -264,27 +268,28 @@ export function ReportTable({
                 onChange={updateCell}
                 onFocus={(editor) => {
                   activeEditor.current = editor
-                  setSuggestionRowId(null)
+                  setSuggestion(null)
                 }}
               />
               <div className="correction-cell" role="cell" data-cell={`${row.id}-correction`}>
                 <CorrectionTypePicker
                   row={row}
                   rowNumber={index + 1}
-                  onChange={(correctionType) => {
+                  onChange={(correctionType, anchor) => {
                     updateRow(row.id, { correctionType })
-                    setSuggestionRowId(
+                    setSuggestion(
                       ['spacing', 'symbol', 'polite'].includes(correctionType)
-                        ? row.id
+                        ? { rowId: row.id, anchor }
                         : null,
                     )
                   }}
                 />
-                {suggestionRowId === row.id && (
+                {suggestion?.rowId === row.id && (
                   <SuggestionPopover
                     type={row.correctionType}
+                    anchor={suggestion.anchor}
                     onChoose={(suggestion) => insertSuggestion(row, suggestion)}
-                    onClose={() => setSuggestionRowId(null)}
+                    onClose={() => setSuggestion(null)}
                   />
                 )}
                 <RichTextEditor
@@ -293,7 +298,7 @@ export function ReportTable({
                   onChange={(value) => updateCell(row.id, 'correction', value)}
                   onEditorFocus={(editor) => {
                     activeEditor.current = editor
-                    setSuggestionRowId(null)
+                    setSuggestion(null)
                   }}
                 />
               </div>
@@ -393,18 +398,35 @@ const SUGGESTIONS: Partial<
 
 function SuggestionPopover({
   type,
+  anchor,
   onChoose,
   onClose,
 }: {
   type: ReportRow['correctionType']
+  anchor: HTMLElement
   onChoose: (suggestion: string) => void
   onClose: () => void
 }) {
   const groups = SUGGESTIONS[type]
   if (!groups) return null
+  const anchorRect = anchor.getBoundingClientRect()
+  const viewportWidth = window.innerWidth || 1024
+  const width = Math.min(350, Math.max(240, viewportWidth - 16))
+  const left = Math.max(
+    window.scrollX + 8,
+    Math.min(
+      anchorRect.right + window.scrollX - width,
+      window.scrollX + viewportWidth - width - 8,
+    ),
+  )
+  const top = anchorRect.top + window.scrollY - 8
 
-  return (
-    <aside className="suggestion-popover" aria-label="자주 쓰는 수정 설명">
+  return createPortal(
+    <aside
+      className="suggestion-popover"
+      aria-label="자주 쓰는 수정 설명"
+      style={{ left, top, width }}
+    >
       <div className="suggestion-heading">
         <strong>자주 쓰는 설명</strong>
         <button type="button" aria-label="추천 닫기" onClick={onClose}>
@@ -424,7 +446,8 @@ function SuggestionPopover({
           ))}
         </div>
       ))}
-    </aside>
+    </aside>,
+    document.body,
   )
 }
 
@@ -494,7 +517,7 @@ function CorrectionTypePicker({
 }: {
   row: ReportRow
   rowNumber: number
-  onChange: (type: ReportRow['correctionType']) => void
+  onChange: (type: ReportRow['correctionType'], anchor: HTMLElement) => void
 }) {
   return (
     <div className="correction-types" aria-label={`${rowNumber}행 수정 유형`}>
@@ -504,7 +527,10 @@ function CorrectionTypePicker({
             type="radio"
             name={`correction-type-${row.id}`}
             checked={row.correctionType === type.value}
-            onChange={() => onChange(type.value)}
+            onChange={(event) => {
+              const anchor = event.currentTarget.closest<HTMLElement>('.correction-types')
+              if (anchor) onChange(type.value, anchor)
+            }}
           />
           {type.label}
         </label>
