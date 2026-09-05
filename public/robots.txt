@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tyypo-report-writer.mustardpil.com/sitemap.xml

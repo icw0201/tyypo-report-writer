@@ -242,7 +242,7 @@ function App() {
           <span>
             <GitBranch size={15} />
             <a
-              href="https://github.com/icw0201/typo-report-writer"
+              href="https://github.com/icw0201/tyypo-report-writer"
               target="_blank"
               rel="noreferrer"
             >
@@ -291,8 +291,7 @@ function createEmptyRow(): ReportRow {
 }
 
 function getPublicProjectUrl(): string {
-  if (['localhost', '127.0.0.1'].includes(window.location.hostname)) return ''
-  return window.location.origin
+  return 'https://tyypo-report-writer.mustardpil.com'
 }
 
 function Required() {
