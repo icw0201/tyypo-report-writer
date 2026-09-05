@@ -1,7 +1,6 @@
 import {
   Check,
   Copy,
-  FilePenLine,
   GitBranch,
   Mail,
   RefreshCcw,
@@ -11,6 +10,7 @@ import {
 import { useEffect, useState } from 'react'
 import { ReportTable } from './components/ReportTable'
 import { RichTextEditor } from './components/RichTextEditor'
+import mustardPilIcon from './assets/머스타드필.png'
 import { createBodyPayload, createTablePayload, writeClipboard } from './lib/clipboard'
 import { clearUserMeta, loadUserMeta, saveUserMeta } from './lib/storage'
 import {
@@ -100,10 +100,10 @@ function App() {
       <div className="workspace">
         <header className="app-header">
           <div className="brand-mark" aria-hidden="true">
-            <FilePenLine />
+            <img src={mustardPilIcon} alt="" />
           </div>
           <div>
-            <p className="eyebrow">TYPO REPORT WRITER</p>
+            <p className="eyebrow">TYYPO REPORT WRITER</p>
             <h1>오타탈자 제보 작성기</h1>
             <p className="subtitle">메일에 바로 붙여 넣을 제보 내용을 편하게 작성하세요.</p>
           </div>
