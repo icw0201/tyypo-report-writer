@@ -12,6 +12,7 @@ dist
 dist-ssr
 coverage
 .vite
+.vercel
 *.local
 .env
 .env.*
