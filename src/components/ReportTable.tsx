@@ -41,7 +41,10 @@ export function ReportTable({
         ) {
           const highlighted = extractHighlightedText(value)
           if (highlighted) {
-            next.correction = escapeHtml(highlighted).replaceAll('\n', '<br>')
+            next.correction = highlighted
+              .split('\n')
+              .map((text) => `${escapeHtml(text)} → `)
+              .join('<br>')
           }
         }
         return next
@@ -95,7 +98,19 @@ export function ReportTable({
   }
 
   return (
-    <section className="card report-section" aria-labelledby="report-table-heading">
+    <section
+      className="card report-section"
+      aria-labelledby="report-table-heading"
+      onPointerDownCapture={(event) => {
+        const target = event.target as HTMLElement
+        if (
+          !target.closest('.suggestion-popover') &&
+          !target.closest('.correction-types')
+        ) {
+          setSuggestionRowId(null)
+        }
+      }}
+    >
       <div className="section-heading">
         <div>
           <p className="eyebrow">REPORT TABLE</p>
@@ -235,6 +250,7 @@ export function ReportTable({
                         location: event.target.value.replace(/\D/g, ''),
                       })
                     }
+                    onFocus={() => setSuggestionRowId(null)}
                   />
                   {reportMeta.locationUnit && (
                     <span>{reportMeta.locationUnit === 'episode' ? '화' : '권'}</span>
@@ -248,6 +264,7 @@ export function ReportTable({
                 onChange={updateCell}
                 onFocus={(editor) => {
                   activeEditor.current = editor
+                  setSuggestionRowId(null)
                 }}
               />
               <div className="correction-cell" role="cell" data-cell={`${row.id}-correction`}>
@@ -257,7 +274,9 @@ export function ReportTable({
                   onChange={(correctionType) => {
                     updateRow(row.id, { correctionType })
                     setSuggestionRowId(
-                      ['spacing', 'symbol'].includes(correctionType) ? row.id : null,
+                      ['spacing', 'symbol', 'polite'].includes(correctionType)
+                        ? row.id
+                        : null,
                     )
                   }}
                 />
@@ -274,6 +293,7 @@ export function ReportTable({
                   onChange={(value) => updateCell(row.id, 'correction', value)}
                   onEditorFocus={(editor) => {
                     activeEditor.current = editor
+                    setSuggestionRowId(null)
                   }}
                 />
               </div>
@@ -345,6 +365,8 @@ const CORRECTION_TYPES: Array<{
   { value: 'spacing', label: '띄어쓰기' },
   { value: 'symbol', label: '기호' },
   { value: 'properNoun', label: '고유명사' },
+  { value: 'format', label: '서식' },
+  { value: 'polite', label: '공손한 말' },
 ]
 
 const SUGGESTIONS: Partial<
@@ -361,6 +383,11 @@ const SUGGESTIONS: Partial<
       '큰 따옴표가 아닌 작은 따옴표가 되어야 할 것 같습니다.',
     ],
     ['따옴표 기호의 방향이 반대로 사용되었습니다.'],
+  ],
+  polite: [
+    [
+      "본문 중 ''라고 표기된 부분이 혹시 맥락상 ''를 의미하신 건 아닐까 조심스럽게 추측해보았습니다. 제가 관련 분야에 전문적인 지식이 있는 것은 아니라 확신할 수는 없지만, 혹시나 해서 살짝 적었습니다.",
+    ],
   ],
 }
 

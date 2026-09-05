@@ -138,6 +138,8 @@ function correctionTypeLabel(type: ReportRow['correctionType']): string {
   if (type === 'spacing') return '띄어쓰기'
   if (type === 'symbol') return '기호'
   if (type === 'properNoun') return '고유명사'
+  if (type === 'format') return '서식'
+  if (type === 'polite') return '공손한 말'
   return ''
 }
 

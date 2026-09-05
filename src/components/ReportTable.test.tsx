@@ -108,7 +108,7 @@ describe('오탈자 표', () => {
     fireEvent.input(original)
 
     expect(screen.getByRole('textbox', { name: '1행 수정' })).toHaveTextContent(
-      '수정할 글자',
+      '수정할 글자 →',
     )
   })
 
@@ -122,6 +122,20 @@ describe('오탈자 표', () => {
 
     expect(screen.getByRole('textbox', { name: '1행 수정' })).toHaveTextContent(
       '띄어쓰기가 두 개 있습니다.',
+    )
+  })
+
+  it('공손한 말 유형에서 긴 안내 문구를 추천한다', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    await user.click(screen.getByRole('radio', { name: '공손한 말' }))
+    const recommendation = screen.getByRole('button', {
+      name: /조심스럽게 추측해보았습니다/,
+    })
+    await user.click(recommendation)
+
+    expect(screen.getByRole('textbox', { name: '1행 수정' })).toHaveTextContent(
+      /혹시나 해서 살짝 적었습니다/,
     )
   })
 })

@@ -662,10 +662,12 @@ h2 {
 }
 
 .suggestion-popover {
-  position: relative;
+  position: absolute;
   z-index: 30;
+  right: 8px;
+  bottom: calc(100% - 30px);
   width: calc(100% - 16px);
-  margin: 8px;
+  margin: 0;
   padding: 10px;
   color: #46546a;
   background: #fff;
@@ -676,14 +678,14 @@ h2 {
 
 .suggestion-popover::before {
   position: absolute;
-  top: -6px;
+  bottom: -6px;
   right: 24px;
   width: 10px;
   height: 10px;
   content: "";
   background: #fff;
-  border-top: 1px solid #bdd0f3;
-  border-left: 1px solid #bdd0f3;
+  border-right: 1px solid #bdd0f3;
+  border-bottom: 1px solid #bdd0f3;
   transform: rotate(45deg);
 }
 

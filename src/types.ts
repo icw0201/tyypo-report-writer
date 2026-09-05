@@ -20,7 +20,13 @@ export interface ReportRow {
   location: string
   original: string
   correction: string
-  correctionType: 'none' | 'spacing' | 'symbol' | 'properNoun'
+  correctionType:
+    | 'none'
+    | 'spacing'
+    | 'symbol'
+    | 'properNoun'
+    | 'format'
+    | 'polite'
 }
 
 export type EditableColumn = 'original' | 'correction'

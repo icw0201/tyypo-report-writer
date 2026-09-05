@@ -20,6 +20,7 @@ describe('메일 기본 문안', () => {
     const body = createDefaultBody({ ...meta, workTitle: '<script>작품' })
     expect(body).toContain('『&lt;script&gt;작품』')
     expect(body).not.toContain('<script>')
+    expect(body).toContain('김작가 작가님의')
     expect(body).toContain('독자 독자 드림')
   })
 
@@ -34,7 +35,8 @@ describe('메일 기본 문안', () => {
     expect(createDefaultSubject(optionalEmpty)).toBe(
       '[오탈자 제보] 『푸른 밤』 오탈자 제보 드립니다',
     )
-    expect(createDefaultBody(optionalEmpty)).toContain('연재 중인 『푸른 밤』')
+    expect(createDefaultBody(optionalEmpty)).toContain('<p>『푸른 밤』의 오탈자')
+    expect(createDefaultBody(optionalEmpty)).not.toContain('작가님의')
     expect(createDefaultBody(optionalEmpty)).toContain('<br>독자 드림')
   })
 })
