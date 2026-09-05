@@ -77,4 +77,31 @@ describe('클립보드 데이터', () => {
       ),
     ).toBe('한국어')
   })
+
+  it('공손한 말은 추천 문구만 복사하고 유형명은 복사하지 않는다', () => {
+    const payload = createTablePayload(
+      '푸른 밤',
+      {
+        platform: '리디',
+        locationUnit: 'episode',
+        dateMode: 'direct',
+        startDate: '',
+        endDate: '',
+        directDate: '2026/09/05',
+      },
+      [
+        {
+          id: '1',
+          location: '3',
+          original: '원문',
+          correction: '조심스럽게 추측해보았습니다.',
+          correctionType: 'polite',
+        },
+      ],
+    )
+
+    expect(payload.plain).toContain('조심스럽게 추측해보았습니다.')
+    expect(payload.plain).not.toContain('[공손한 말]')
+    expect(payload.html).not.toContain('[공손한 말]')
+  })
 })

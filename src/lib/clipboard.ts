@@ -139,7 +139,8 @@ function correctionTypeLabel(type: ReportRow['correctionType']): string {
   if (type === 'symbol') return '기호'
   if (type === 'properNoun') return '고유명사'
   if (type === 'format') return '서식'
-  if (type === 'polite') return '공손한 말'
+  // '공손한 말'은 추천 문구 입력을 돕는 UI 옵션이며 표 데이터 유형은 아니다.
+  if (type === 'polite') return ''
   return ''
 }
 

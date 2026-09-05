@@ -1,4 +1,13 @@
-import { Check, Copy, FilePenLine, Mail, RefreshCcw, ShieldCheck, Trash2 } from 'lucide-react'
+import {
+  Check,
+  Copy,
+  FilePenLine,
+  GitBranch,
+  Mail,
+  RefreshCcw,
+  ShieldCheck,
+  Trash2,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { ReportTable } from './components/ReportTable'
 import { RichTextEditor } from './components/RichTextEditor'
@@ -224,8 +233,22 @@ function App() {
         </div>
 
         <footer>
-          <Mail size={15} />
-          문의·제안·건의 <a href="mailto:gaebal0201@gmail.com">gaebal0201@gmail.com</a>
+          <span>
+            <Mail size={15} />
+            문의·제안·건의{' '}
+            <a href="mailto:gaebal0201@gmail.com">gaebal0201@gmail.com</a>
+          </span>
+          <span className="footer-divider" aria-hidden="true">·</span>
+          <span>
+            <GitBranch size={15} />
+            <a
+              href="https://github.com/icw0201/typo-report-writer"
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub 저장소
+            </a>
+          </span>
         </footer>
       </div>
     </main>
