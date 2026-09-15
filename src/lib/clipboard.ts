@@ -82,20 +82,23 @@ export function createTablePayload(
     )
     .join('')
   const rowsHtml = rows
-    .map(
-      (row, index) =>
-        `<tr><td style="${baseCell};text-align:center;width:54px">${index + 1}</td>` +
-        `<td style="${baseCell};width:130px">${escapeHtml(formatLocation(row, reportMeta.locationUnit)) || '&nbsp;'}</td>` +
-        `<td style="${baseCell};width:280px">${sanitizeRichHtml(row.original) || '&nbsp;'}</td>` +
-        `<td style="${baseCell};width:280px">${formatCorrectionHtml(row) || '&nbsp;'}</td></tr>`,
-    )
+    .map((row, index) => {
+      const backgroundColor = index % 2 === 1 ? '#f5f8ff' : '#ffffff'
+      const rowCell = `${baseCell};background-color:${backgroundColor}`
+      return (
+        `<tr><td style="${rowCell};text-align:center;width:54px">${index + 1}</td>` +
+        `<td style="${rowCell};width:130px">${escapeHtml(formatLocation(row, reportMeta.locationUnit)) || '&nbsp;'}</td>` +
+        `<td style="${rowCell};width:280px">${sanitizeRichHtml(row.original) || '&nbsp;'}</td>` +
+        `<td style="${rowCell};width:280px">${formatCorrectionHtml(row) || '&nbsp;'}</td></tr>`
+      )
+    })
     .join('')
   const safeProjectUrl = /^https?:\/\//.test(projectUrl) ? escapeHtml(projectUrl) : ''
   const projectName = safeProjectUrl
     ? `<a href="${safeProjectUrl}" style="color:#3974d8;text-decoration:underline">tyypo-report-writer</a>`
     : 'tyypo-report-writer'
   const attributionHtml =
-    `<tr><td colspan="4" style="${baseCell};color:#64748b;background-color:#f8fafc;font-size:12px;text-align:center">` +
+    `<tr><td colspan="4" style="${baseCell};padding:3px 8px;line-height:1.2;color:#64748b;background-color:#f8fafc;font-size:10px;text-align:center">` +
     `이 표는 오타탈자 제보 작성기(${projectName})를 사용해 작성되었습니다.</td></tr>`
 
   return {

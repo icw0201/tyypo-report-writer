@@ -105,7 +105,9 @@ function App() {
           <div>
             <p className="eyebrow">TYYPO REPORT WRITER</p>
             <h1>오타탈자 제보 작성기</h1>
-            <p className="subtitle">메일에 바로 붙여 넣을 제보 내용을 편하게 작성하세요.</p>
+            <p className="subtitle">
+              웹소설·전자책 오탈자 제보를 작성해 메일에 바로 붙여 넣으세요.
+            </p>
           </div>
         </header>
 
