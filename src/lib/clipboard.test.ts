@@ -53,6 +53,13 @@ describe('클립보드 데이터', () => {
           correction: '됐다',
           correctionType: 'spacing',
         },
+        {
+          id: '2',
+          location: '13',
+          original: '두번째 원문',
+          correction: '두번째 수정',
+          correctionType: 'none',
+        },
       ],
       'https://example.vercel.app',
     )
@@ -61,6 +68,11 @@ describe('클립보드 데이터', () => {
     expect(payload.plain).toContain('1\t12화\t됬다\t[띄어쓰기] 됐다')
     expect(payload.html).toContain('border-collapse:collapse')
     expect(payload.html).toContain('<strong>됬다</strong>')
+    expect(payload.html).toContain('background-color:#f5f8ff')
+    expect(payload.html).toContain(
+      'padding:3px 8px;line-height:1.2;color:#64748b',
+    )
+    expect(payload.html).toContain('font-size:10px;text-align:center')
     expect(payload.html).toContain(
       'href="https://example.vercel.app"',
     )
