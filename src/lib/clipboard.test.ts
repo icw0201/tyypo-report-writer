@@ -3,6 +3,7 @@ import {
   createBodyPayload,
   createTablePayload,
   extractHighlightedText,
+  formatLocation,
   formatReadingDate,
   sanitizeRichHtml,
 } from './clipboard'
@@ -65,8 +66,16 @@ describe('클립보드 데이터', () => {
     )
 
     expect(payload.plain).toContain('작품명\t『푸른 밤』')
+    expect(payload.plain).toContain('num\t위치\t본문\t수정')
     expect(payload.plain).toContain('1\t12화\t됬다\t[띄어쓰기] 됐다')
     expect(payload.html).toContain('border-collapse:collapse')
+    expect(payload.html).toContain('table-layout:fixed')
+    expect(payload.html).toContain('<col width="40" style="width:40px">')
+    expect(payload.html).toContain(
+      '<td width="40" style="border:1px solid #94a3b8',
+    )
+    expect(payload.html).toContain('max-width:40px')
+    expect(payload.html).toContain('white-space:nowrap')
     expect(payload.html).toContain('<strong>됬다</strong>')
     expect(payload.html).toContain('background-color:#f5f8ff')
     expect(payload.html).toContain(
@@ -115,5 +124,20 @@ describe('클립보드 데이터', () => {
     expect(payload.plain).toContain('조심스럽게 추측해보았습니다.')
     expect(payload.plain).not.toContain('[공손한 말]')
     expect(payload.html).not.toContain('[공손한 말]')
+  })
+
+  it('빈 위치에는 단위를 남기지 않고 일반 텍스트와 새 단위를 지원한다', () => {
+    const row = {
+      id: '1',
+      location: '',
+      original: '',
+      correction: '',
+      correctionType: 'none' as const,
+    }
+
+    expect(formatLocation(row, 'episode')).toBe('')
+    expect(formatLocation({ ...row, location: '외전' }, 'custom')).toBe('외전')
+    expect(formatLocation({ ...row, location: '12' }, 'page')).toBe('12p')
+    expect(formatLocation({ ...row, location: '40' }, 'percent')).toBe('40%')
   })
 })

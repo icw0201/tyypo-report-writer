@@ -8,7 +8,7 @@ export interface UserMeta {
 
 export interface ReportMeta {
   platform: string
-  locationUnit: 'episode' | 'volume' | ''
+  locationUnit: 'episode' | 'volume' | 'page' | 'percent' | 'custom'
   dateMode: 'calendar' | 'direct'
   startDate: string
   endDate: string
