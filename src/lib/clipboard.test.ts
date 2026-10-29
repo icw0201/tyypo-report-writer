@@ -71,6 +71,9 @@ describe('클립보드 데이터', () => {
     expect(payload.html).toContain('border-collapse:collapse')
     expect(payload.html).toContain('table-layout:fixed')
     expect(payload.html).toContain('<col width="40" style="width:40px">')
+    expect(payload.html).toContain('<col width="140" style="width:140px">')
+    expect(payload.html).toContain('<col width="310" style="width:310px">')
+    expect(payload.html).toContain('<col width="270" style="width:270px">')
     expect(payload.html).toContain(
       '<td width="40" style="border:1px solid #94a3b8',
     )
