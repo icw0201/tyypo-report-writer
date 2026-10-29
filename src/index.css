@@ -507,7 +507,7 @@ h2 {
 
 .report-row {
   display: grid;
-  grid-template-columns: 40px 230px minmax(240px, 1fr) minmax(240px, 1fr) 40px;
+  grid-template-columns: 40px 170px minmax(300px, 1.2fr) minmax(240px, 1fr) 40px;
 }
 
 .report-tools-row {

@@ -92,9 +92,9 @@ export function createTablePayload(
       const rowCell = `${baseCell};background-color:${backgroundColor}`
       return (
         `<tr><td width="40" style="${numberCell};background-color:${backgroundColor}">${index + 1}</td>` +
-        `<td style="${rowCell};width:180px">${escapeHtml(formatLocation(row, reportMeta.locationUnit)) || '&nbsp;'}</td>` +
-        `<td style="${rowCell};width:280px">${sanitizeRichHtml(row.original) || '&nbsp;'}</td>` +
-        `<td style="${rowCell};width:280px">${formatCorrectionHtml(row) || '&nbsp;'}</td></tr>`
+        `<td width="140" style="${rowCell};width:140px">${escapeHtml(formatLocation(row, reportMeta.locationUnit)) || '&nbsp;'}</td>` +
+        `<td width="310" style="${rowCell};width:310px">${sanitizeRichHtml(row.original) || '&nbsp;'}</td>` +
+        `<td width="270" style="${rowCell};width:270px">${formatCorrectionHtml(row) || '&nbsp;'}</td></tr>`
       )
     })
     .join('')
@@ -110,10 +110,10 @@ export function createTablePayload(
     plain: plainLines.join('\n'),
     html:
       `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:760px;table-layout:fixed">` +
-      `<colgroup><col width="40" style="width:40px"><col width="180"><col><col></colgroup>` +
+      `<colgroup><col width="40" style="width:40px"><col width="140" style="width:140px"><col width="310" style="width:310px"><col width="270" style="width:270px"></colgroup>` +
       `<tbody>${metadataHtml}` +
-      `<tr><td width="40" style="${numberHeaderCell}">num</td><td style="${headerCell};width:180px">위치</td>` +
-      `<td style="${headerCell};width:280px">본문</td><td style="${headerCell};width:280px">수정</td></tr>` +
+      `<tr><td width="40" style="${numberHeaderCell}">num</td><td width="140" style="${headerCell};width:140px">위치</td>` +
+      `<td width="310" style="${headerCell};width:310px">본문</td><td width="270" style="${headerCell};width:270px">수정</td></tr>` +
       `${rowsHtml}${attributionHtml}</tbody></table>`,
   }
 }
