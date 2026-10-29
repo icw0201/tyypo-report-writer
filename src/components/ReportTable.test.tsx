@@ -63,18 +63,38 @@ describe('오탈자 표', () => {
     expect(document.execCommand).toHaveBeenCalledWith('insertText', false, '글자만')
   })
 
-  it('헤더의 권 단위를 모든 위치 입력에 적용하고 수정 유형을 선택한다', async () => {
+  it('위치 헤더에서 선택한 단위를 모든 위치 입력에 적용한다', async () => {
     const user = userEvent.setup()
     render(<Harness />)
 
+    expect(screen.getByRole('radio', { name: '화' })).toBeChecked()
     await user.click(screen.getByRole('radio', { name: '권' }))
-    await user.type(screen.getByRole('textbox', { name: '1행 화 또는 권 숫자' }), '11')
+    await user.type(screen.getByRole('textbox', { name: '1행 위치' }), '11')
     await user.click(screen.getByRole('radio', { name: '띄어쓰기' }))
 
-    const locationHeader = screen.getByRole('columnheader', { name: /권/ })
-    expect(locationHeader.querySelector(':scope > span')).toHaveTextContent('권')
+    const locationHeader = screen.getByRole('columnheader', { name: /위치/ })
+    expect(locationHeader.querySelector(':scope > span')).toHaveTextContent('위치')
     expect(screen.getByText('권', { selector: '.location-number span' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: '띄어쓰기' })).toBeChecked()
+  })
+
+  it('p, %, 자유입력 단위와 일반 텍스트 위치를 지원한다', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    const location = screen.getByRole('textbox', { name: '1행 위치' })
+
+    await user.click(screen.getByRole('radio', { name: 'p' }))
+    await user.type(location, '12')
+    expect(screen.getByText('p', { selector: '.location-number span' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: '%' }))
+    expect(screen.getByText('%', { selector: '.location-number span' })).toBeInTheDocument()
+
+    await user.clear(location)
+    await user.click(screen.getByRole('radio', { name: '자유입력' }))
+    await user.type(location, '외전 후기')
+    expect(location).toHaveValue('외전 후기')
+    expect(document.querySelector('.location-number span')).not.toBeInTheDocument()
   })
 
   it('달력 날짜를 YYYY/MM/DD 형식으로 입력한다', async () => {
@@ -108,8 +128,36 @@ describe('오탈자 표', () => {
     fireEvent.input(original)
 
     expect(screen.getByRole('textbox', { name: '1행 수정' })).toHaveTextContent(
-      '수정할 글자 →',
+      '수정할 글자 → 수정할 글자',
     )
+  })
+
+  it('입력 중 Tab을 누르면 라디오와 삭제 버튼을 건너뛰고 다음 입력란으로 이동한다', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    const location = screen.getByRole('textbox', { name: '1행 위치' })
+    const original = screen.getByRole('textbox', { name: '1행 본문' })
+    const correction = screen.getByRole('textbox', { name: '1행 수정' })
+
+    location.focus()
+    await user.tab()
+    expect(original).toHaveFocus()
+    await user.tab()
+    expect(correction).toHaveFocus()
+
+    expect(screen.getByRole('radio', { name: '띄어쓰기' })).toHaveAttribute(
+      'tabindex',
+      '-1',
+    )
+    expect(screen.getByRole('button', { name: '1행 삭제' })).toHaveAttribute(
+      'tabindex',
+      '-1',
+    )
+  })
+
+  it('꺾쇠 입력 안내를 작은따옴표로 표시한다', () => {
+    render(<Harness />)
+    expect(screen.getByText(/'>>'를 입력하면/)).toBeInTheDocument()
   })
 
   it('수정 유형 추천을 선택하면 수정란 첫 줄에 입력한다', async () => {
@@ -123,6 +171,22 @@ describe('오탈자 표', () => {
     expect(screen.getByRole('textbox', { name: '1행 수정' })).toHaveTextContent(
       '띄어쓰기가 두 개 있습니다.',
     )
+  })
+
+  it('기호 유형에서 범용적인 말따옴표 설명을 추천한다', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    await user.click(screen.getByRole('radio', { name: '기호' }))
+
+    expect(
+      screen.getByRole('button', { name: '닫는 따옴표가 없습니다.' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: '시작 따옴표가 없습니다.' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: '짝이 없는 따옴표가 있습니다.' }),
+    ).toBeInTheDocument()
   })
 
   it('공손한 말 유형에서 긴 안내 문구를 추천한다', async () => {

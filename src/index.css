@@ -507,7 +507,7 @@ h2 {
 
 .report-row {
   display: grid;
-  grid-template-columns: 56px 144px minmax(260px, 1fr) minmax(260px, 1fr) 42px;
+  grid-template-columns: 40px 230px minmax(240px, 1fr) minmax(240px, 1fr) 40px;
 }
 
 .report-tools-row {
@@ -570,6 +570,8 @@ h2 {
 .header-unit-toggle {
   display: flex;
   gap: 7px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   margin-left: auto;
   color: #e2e8f0;
   font-size: 0.7rem;

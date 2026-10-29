@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { RichTextEditor } from './RichTextEditor'
 
 describe('서식 편집기', () => {
@@ -39,5 +39,23 @@ describe('서식 편집기', () => {
     fireEvent.input(editor)
 
     expect(editor).toHaveTextContent('내용→')
+  })
+
+  it('한글 조합이 끝난 마지막 글자를 상태에 반영한다', () => {
+    const onChange = vi.fn()
+    render(<RichTextEditor value="" onChange={onChange} label="한글 편집기" />)
+    const editor = screen.getByRole('textbox', { name: '한글 편집기' })
+
+    fireEvent.compositionStart(editor)
+    editor.innerHTML = '마지막 한글'
+    fireEvent.input(editor)
+    expect(onChange).not.toHaveBeenCalled()
+
+    fireEvent.compositionEnd(editor)
+    expect(onChange).toHaveBeenLastCalledWith('마지막 한글')
+
+    editor.innerHTML = '마지막 한글도 유지'
+    fireEvent.blur(editor)
+    expect(onChange).toHaveBeenLastCalledWith('마지막 한글도 유지')
   })
 })

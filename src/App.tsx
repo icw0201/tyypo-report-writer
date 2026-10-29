@@ -29,7 +29,7 @@ function App() {
   const [rows, setRows] = useState<ReportRow[]>(() => [createEmptyRow()])
   const [reportMeta, setReportMeta] = useState<ReportMeta>({
     platform: '',
-    locationUnit: '',
+    locationUnit: 'episode',
     dateMode: 'calendar',
     startDate: '',
     endDate: '',
@@ -87,7 +87,7 @@ function App() {
     setRows([createEmptyRow()])
     setReportMeta({
       platform: '',
-      locationUnit: '',
+      locationUnit: 'episode',
       dateMode: 'calendar',
       startDate: '',
       endDate: '',

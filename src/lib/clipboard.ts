@@ -57,7 +57,7 @@ export function createTablePayload(
   const plainLines = [
     ...metadata.map(([label, value]) => `${label}\t${value}`),
     '',
-    `num\t${locationHeader(reportMeta.locationUnit)}\t본문\t수정`,
+    'num\t위치\t본문\t수정',
     ...rows.map((row, index) =>
       [
         String(index + 1),
@@ -74,11 +74,16 @@ export function createTablePayload(
     "border:1px solid #94a3b8;padding:8px 10px;vertical-align:top;white-space:pre-wrap;font-family:Arial,'Malgun Gothic',sans-serif;font-size:14px;line-height:1.5;color:#1f2937"
   const labelCell = `${baseCell};background-color:#eef4ff;font-weight:700;width:120px`
   const headerCell = `${baseCell};background-color:#6196f7;color:#ffffff;font-weight:700;text-align:center`
+  const numberCell = `${baseCell};padding:8px 2px;text-align:center;width:40px;min-width:40px;max-width:40px;box-sizing:border-box`
+  const numberHeaderCell = `${headerCell};padding:8px 2px;width:40px;min-width:40px;max-width:40px;box-sizing:border-box;white-space:nowrap`
 
   const metadataHtml = metadata
     .map(
       ([label, value]) =>
-        `<tr><td style="${labelCell}">${escapeHtml(label)}</td><td colspan="3" style="${baseCell}">${escapeHtml(value || '-')}</td></tr>`,
+        `<tr><td colspan="4" style="padding:0;border:0">` +
+        `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;table-layout:fixed">` +
+        `<tr><td width="120" style="${labelCell}">${escapeHtml(label)}</td><td style="${baseCell}">${escapeHtml(value || '-')}</td></tr>` +
+        `</table></td></tr>`,
     )
     .join('')
   const rowsHtml = rows
@@ -86,8 +91,8 @@ export function createTablePayload(
       const backgroundColor = index % 2 === 1 ? '#f5f8ff' : '#ffffff'
       const rowCell = `${baseCell};background-color:${backgroundColor}`
       return (
-        `<tr><td style="${rowCell};text-align:center;width:54px">${index + 1}</td>` +
-        `<td style="${rowCell};width:130px">${escapeHtml(formatLocation(row, reportMeta.locationUnit)) || '&nbsp;'}</td>` +
+        `<tr><td width="40" style="${numberCell};background-color:${backgroundColor}">${index + 1}</td>` +
+        `<td style="${rowCell};width:180px">${escapeHtml(formatLocation(row, reportMeta.locationUnit)) || '&nbsp;'}</td>` +
         `<td style="${rowCell};width:280px">${sanitizeRichHtml(row.original) || '&nbsp;'}</td>` +
         `<td style="${rowCell};width:280px">${formatCorrectionHtml(row) || '&nbsp;'}</td></tr>`
       )
@@ -104,9 +109,10 @@ export function createTablePayload(
   return {
     plain: plainLines.join('\n'),
     html:
-      `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:760px">` +
+      `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:760px;table-layout:fixed">` +
+      `<colgroup><col width="40" style="width:40px"><col width="180"><col><col></colgroup>` +
       `<tbody>${metadataHtml}` +
-      `<tr><td style="${headerCell};width:54px">num</td><td style="${headerCell};width:130px">${locationHeader(reportMeta.locationUnit)}</td>` +
+      `<tr><td width="40" style="${numberHeaderCell}">num</td><td style="${headerCell};width:180px">위치</td>` +
       `<td style="${headerCell};width:280px">본문</td><td style="${headerCell};width:280px">수정</td></tr>` +
       `${rowsHtml}${attributionHtml}</tbody></table>`,
   }
@@ -116,12 +122,18 @@ export function formatLocation(
   row: ReportRow,
   unit: ReportMeta['locationUnit'],
 ): string {
-  const suffix = unit === 'episode' ? '화' : unit === 'volume' ? '권' : ''
+  if (!row.location.trim()) return ''
+  const suffix =
+    unit === 'episode'
+      ? '화'
+      : unit === 'volume'
+        ? '권'
+        : unit === 'page'
+          ? 'p'
+          : unit === 'percent'
+            ? '%'
+            : ''
   return `${row.location}${suffix}`
-}
-
-function locationHeader(unit: ReportMeta['locationUnit']): string {
-  return unit === 'episode' ? '화' : unit === 'volume' ? '권' : '화/권(선택)'
 }
 
 function formatCorrectionPlain(row: ReportRow): string {

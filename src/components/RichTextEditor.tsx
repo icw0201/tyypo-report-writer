@@ -34,6 +34,7 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const localRef = useRef<HTMLDivElement>(null)
   const ref = editorRef ?? localRef
+  const isComposing = useRef(false)
 
   useLayoutEffect(() => {
     const element = ref.current
@@ -71,8 +72,21 @@ export function RichTextEditor({
         suppressContentEditableWarning
         data-placeholder={placeholder}
         onFocus={(event) => onEditorFocus?.(event.currentTarget)}
-        onInput={(event) => {
+        onCompositionStart={() => {
+          isComposing.current = true
+        }}
+        onCompositionEnd={(event) => {
+          isComposing.current = false
           replaceTypedArrow(event.currentTarget)
+          onChange(event.currentTarget.innerHTML)
+        }}
+        onInput={(event) => {
+          if (isComposing.current) return
+          replaceTypedArrow(event.currentTarget)
+          onChange(event.currentTarget.innerHTML)
+        }}
+        onBlur={(event) => {
+          isComposing.current = false
           onChange(event.currentTarget.innerHTML)
         }}
         onPaste={handlePaste}

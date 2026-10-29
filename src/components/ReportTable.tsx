@@ -47,7 +47,10 @@ export function ReportTable({
           if (highlighted) {
             next.correction = highlighted
               .split('\n')
-              .map((text) => `${escapeHtml(text)} → `)
+              .map((text) => {
+                const safeText = escapeHtml(text)
+                return `${safeText} → ${safeText}`
+              })
               .join('<br>')
           }
         }
@@ -124,7 +127,7 @@ export function ReportTable({
 
       <p className="table-help">
         붙여넣기는 글자만 적용됩니다. Enter로 줄을 바꾸고, Tab으로 다음 칸으로 이동하세요.
-        Ctrl+B는 선택한 글자에 <mark>하늘색 형광펜</mark>을 적용합니다. `&gt;&gt;`를
+        Ctrl+B는 선택한 글자에 <mark>하늘색 형광펜</mark>을 적용합니다. '&gt;&gt;'를
         입력하면 → 기호로 자동 변환됩니다.
       </p>
 
@@ -200,18 +203,13 @@ export function ReportTable({
           <div className="report-row report-row--header" role="row">
             <div role="columnheader">num</div>
             <div className="location-header" role="columnheader">
-              <span>
-                {reportMeta.locationUnit === 'episode'
-                  ? '화'
-                  : reportMeta.locationUnit === 'volume'
-                    ? '권'
-                    : '화/권'}
-              </span>
-              <div className="header-unit-toggle" aria-label="화 또는 권 단위">
+              <span>위치</span>
+              <div className="header-unit-toggle" aria-label="위치 단위">
                 <label>
                   <input
                     type="radio"
                     name="location-unit"
+                    tabIndex={-1}
                     checked={reportMeta.locationUnit === 'episode'}
                     onChange={() => updateMeta('locationUnit', 'episode')}
                   />
@@ -221,10 +219,41 @@ export function ReportTable({
                   <input
                     type="radio"
                     name="location-unit"
+                    tabIndex={-1}
                     checked={reportMeta.locationUnit === 'volume'}
                     onChange={() => updateMeta('locationUnit', 'volume')}
                   />
                   권
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="location-unit"
+                    tabIndex={-1}
+                    checked={reportMeta.locationUnit === 'page'}
+                    onChange={() => updateMeta('locationUnit', 'page')}
+                  />
+                  p
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="location-unit"
+                    tabIndex={-1}
+                    checked={reportMeta.locationUnit === 'percent'}
+                    onChange={() => updateMeta('locationUnit', 'percent')}
+                  />
+                  %
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="location-unit"
+                    tabIndex={-1}
+                    checked={reportMeta.locationUnit === 'custom'}
+                    onChange={() => updateMeta('locationUnit', 'custom')}
+                  />
+                  자유입력
                 </label>
               </div>
             </div>
@@ -246,18 +275,15 @@ export function ReportTable({
                 <div className="location-number">
                   <input
                     className="location-input"
-                    inputMode="numeric"
-                    aria-label={`${index + 1}행 화 또는 권 숫자`}
+                    aria-label={`${index + 1}행 위치`}
                     value={row.location}
                     onChange={(event) =>
-                      updateRow(row.id, {
-                        location: event.target.value.replace(/\D/g, ''),
-                      })
+                      updateRow(row.id, { location: event.target.value })
                     }
                     onFocus={() => setSuggestion(null)}
                   />
-                  {reportMeta.locationUnit && (
-                    <span>{reportMeta.locationUnit === 'episode' ? '화' : '권'}</span>
+                  {row.location.trim() && locationUnitSuffix(reportMeta.locationUnit) && (
+                    <span>{locationUnitSuffix(reportMeta.locationUnit)}</span>
                   )}
                 </div>
               </div>
@@ -305,6 +331,7 @@ export function ReportTable({
               <button
                 type="button"
                 className="delete-row"
+                tabIndex={-1}
                 aria-label={`${index + 1}행 삭제`}
                 onClick={() => removeRow(row.id)}
               >
@@ -382,7 +409,11 @@ const SUGGESTIONS: Partial<
   ],
   symbol: [
     ['문장 끝 마침표가 없습니다.'],
-    ['대사 시작 말따옴표가 없습니다.', '대사 끝 말따옴표가 없습니다.'],
+    [
+      '닫는 따옴표가 없습니다.',
+      '시작 따옴표가 없습니다.',
+      '짝이 없는 따옴표가 있습니다.',
+    ],
     [
       '작은 따옴표가 아닌 큰 따옴표가 되어야 할 것 같습니다.',
       '큰 따옴표가 아닌 작은 따옴표가 되어야 할 것 같습니다.',
@@ -526,6 +557,7 @@ function CorrectionTypePicker({
           <input
             type="radio"
             name={`correction-type-${row.id}`}
+            tabIndex={-1}
             checked={row.correctionType === type.value}
             onChange={(event) => {
               const anchor = event.currentTarget.closest<HTMLElement>('.correction-types')
@@ -581,6 +613,14 @@ function formatDateTyping(value: string): string {
 
 function toIsoDate(value: string): string {
   return /^\d{4}\/\d{2}\/\d{2}$/.test(value) ? value.replaceAll('/', '-') : ''
+}
+
+function locationUnitSuffix(unit: ReportMeta['locationUnit']): string {
+  if (unit === 'episode') return '화'
+  if (unit === 'volume') return '권'
+  if (unit === 'page') return 'p'
+  if (unit === 'percent') return '%'
+  return ''
 }
 
 function createRowId(): string {
